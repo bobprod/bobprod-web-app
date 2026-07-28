@@ -11,7 +11,28 @@
 </head>
 <body>
 
-<div class="wf-shell">
+<div class="wf-login-screen" id="login-screen">
+  <div class="wf-login-card">
+    <div class="wf-login-mark">
+      <svg width="34" height="34" viewBox="0 0 256 256" aria-hidden="true"><circle cx="96" cy="160" r="80" fill="#0a0a0a" stroke="#fff" stroke-width="6"></circle><circle cx="96" cy="160" r="26" fill="#d1382a"></circle><path d="M176 160 V48 C176 40 182 36 190 40 L214 52 C220 55 224 61 224 68 V72" stroke="#f0a91f" stroke-width="10" stroke-linecap="round" fill="none"></path></svg>
+    </div>
+    <div class="wf-login-title">bobprod admin</div>
+    <p class="wf-login-sub">Identity context — single admin account, session cookie.</p>
+    <form id="login-form">
+      <label class="wf-full">Username
+        <input type="text" id="login-username" value="admin" autocomplete="username">
+      </label>
+      <label class="wf-full">Password
+        <input type="password" id="login-password" value="••••••••" autocomplete="current-password">
+      </label>
+      <div class="wf-login-error" id="login-error" hidden>Incorrect username or password.</div>
+      <button type="submit" class="wf-btn wf-btn-primary wf-btn-block">Sign in</button>
+    </form>
+    <span class="wf-annot">wireframe — any credentials sign in; try "wrong" as the password to see the error state</span>
+  </div>
+</div>
+
+<div class="wf-shell" id="wf-shell" hidden>
 
   <aside class="wf-sidebar">
     <div class="wf-brand">bobprod<span>Admin</span></div>
@@ -71,12 +92,31 @@
     </div>
   </aside>
 
+  <div class="wf-backdrop" id="sidebar-backdrop" hidden></div>
+
   <main class="wf-main">
     <header class="wf-topbar">
+      <button type="button" class="wf-hamburger" id="hamburger-btn" aria-label="Open menu" aria-expanded="false">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 6h18M3 12h18M3 18h18"></path></svg>
+      </button>
       <div id="page-title" class="wf-page-title">Dashboard</div>
       <div class="wf-topbar-right">
+        <label class="wf-demo-state">
+          <span class="wf-annot">demo data:</span>
+          <select id="data-state-select">
+            <option value="loaded">Loaded</option>
+            <option value="empty">Empty</option>
+            <option value="loading">Loading</option>
+            <option value="error">Error</option>
+          </select>
+        </label>
         <span class="wf-pill wf-pill-neutral">Preview mode</span>
-        <div class="wf-avatar">A</div>
+        <div class="wf-avatar-menu">
+          <button type="button" class="wf-avatar" id="avatar-btn" aria-haspopup="true" aria-expanded="false">A</button>
+          <div class="wf-avatar-dropdown" id="avatar-dropdown" hidden>
+            <button type="button" id="logout-btn">Log out</button>
+          </div>
+        </div>
       </div>
     </header>
 
@@ -157,14 +197,9 @@
           </div>
         </div>
 
-        <table class="wf-table wf-table-drag">
+        <table class="wf-table wf-table-drag" id="tracks-table">
           <thead><tr><th></th><th>Title</th><th>Artist</th><th>Duration</th><th></th></tr></thead>
-          <tbody>
-            <tr><td class="wf-drag">⠿</td><td>Night Signal (Original Mix)</td><td>bobprod</td><td>3:42</td><td class="wf-row-actions"><button class="wf-icon-btn" title="Edit">✎</button><button class="wf-icon-btn" title="Delete">✕</button></td></tr>
-            <tr><td class="wf-drag">⠿</td><td>Afterglow (Extended Mix)</td><td>bobprod</td><td>5:18</td><td class="wf-row-actions"><button class="wf-icon-btn" title="Edit">✎</button><button class="wf-icon-btn" title="Delete">✕</button></td></tr>
-            <tr><td class="wf-drag">⠿</td><td>Concrete Heat</td><td>bobprod</td><td>4:07</td><td class="wf-row-actions"><button class="wf-icon-btn" title="Edit">✎</button><button class="wf-icon-btn" title="Delete">✕</button></td></tr>
-            <tr><td class="wf-drag">⠿</td><td>Warehouse 12 — Full Set</td><td>bobprod</td><td>1:18:32</td><td class="wf-row-actions"><button class="wf-icon-btn" title="Edit">✎</button><button class="wf-icon-btn" title="Delete">✕</button></td></tr>
-          </tbody>
+          <tbody id="tracks-tbody"></tbody>
         </table>
       </section>
 
@@ -193,11 +228,7 @@
 
         <table class="wf-table">
           <thead><tr><th>Date</th><th>Venue</th><th>City</th><th>Published</th><th></th></tr></thead>
-          <tbody>
-            <tr><td>Aug 14</td><td>Tresor Club</td><td>Berlin, Germany</td><td><span class="wf-pill wf-pill-confirmed">Yes</span></td><td class="wf-row-actions"><button class="wf-icon-btn" title="Edit">✎</button><button class="wf-icon-btn" title="Delete">✕</button></td></tr>
-            <tr><td>Sep 02</td><td>Le Sucre</td><td>Lyon, France</td><td><span class="wf-pill wf-pill-confirmed">Yes</span></td><td class="wf-row-actions"><button class="wf-icon-btn" title="Edit">✎</button><button class="wf-icon-btn" title="Delete">✕</button></td></tr>
-            <tr><td>Sep 21</td><td>De School</td><td>Amsterdam, NL</td><td><span class="wf-pill wf-pill-neutral">Draft</span></td><td class="wf-row-actions"><button class="wf-icon-btn" title="Edit">✎</button><button class="wf-icon-btn" title="Delete">✕</button></td></tr>
-          </tbody>
+          <tbody id="events-tbody"></tbody>
         </table>
       </section>
 
@@ -208,41 +239,7 @@
         </div>
         <table class="wf-table">
           <thead><tr><th>Name</th><th>Email</th><th>Event type</th><th>Requested date</th><th>Message</th><th>Status</th></tr></thead>
-          <tbody>
-            <tr>
-              <td>Amine Bouarada</td><td>amine@example.com</td><td>Festival</td><td>Jul 15, 2026</td>
-              <td class="wf-truncate">Looking for a 90-minute closing set for our...</td>
-              <td>
-                <select class="wf-status-select pending">
-                  <option value="pending" selected>Pending</option>
-                  <option value="confirmed">Confirmed</option>
-                  <option value="declined">Declined</option>
-                </select>
-              </td>
-            </tr>
-            <tr>
-              <td>Lena Fischer</td><td>lena.fischer@mail.com</td><td>Private Event</td><td>Aug 02, 2026</td>
-              <td class="wf-truncate">Birthday party, ~150 guests, warehouse space...</td>
-              <td>
-                <select class="wf-status-select confirmed">
-                  <option value="pending">Pending</option>
-                  <option value="confirmed" selected>Confirmed</option>
-                  <option value="declined">Declined</option>
-                </select>
-              </td>
-            </tr>
-            <tr>
-              <td>Marco Dubois</td><td>marco.d@clubnine.fr</td><td>Club Night</td><td>Sep 09, 2026</td>
-              <td class="wf-truncate">Resident night, 3-hour set, Friday...</td>
-              <td>
-                <select class="wf-status-select pending">
-                  <option value="pending" selected>Pending</option>
-                  <option value="confirmed">Confirmed</option>
-                  <option value="declined">Declined</option>
-                </select>
-              </td>
-            </tr>
-          </tbody>
+          <tbody id="bookings-tbody"></tbody>
         </table>
       </section>
 
@@ -272,64 +269,7 @@
         </div>
 
         <div class="wf-split">
-          <div class="wf-link-list" id="link-list">
-            <div class="wf-link-row">
-              <span class="wf-drag">⠿</span>
-              <span class="wf-platform-dot" style="background:#1ED760"></span>
-              <span class="wf-link-text"><b>Listen on Spotify</b><small>Night Signal — Original Mix</small></span>
-              <label class="wf-switch"><input type="checkbox" checked><span></span></label>
-              <button class="wf-icon-btn" title="Edit">✎</button>
-            </div>
-            <div class="wf-link-row">
-              <span class="wf-drag">⠿</span>
-              <span class="wf-platform-dot" style="background:linear-gradient(135deg,#FA233B,#FB5C74)"></span>
-              <span class="wf-link-text"><b>Listen on Apple Music</b><small>Night Signal — Original Mix</small></span>
-              <label class="wf-switch"><input type="checkbox" checked><span></span></label>
-              <button class="wf-icon-btn" title="Edit">✎</button>
-            </div>
-            <div class="wf-link-row">
-              <span class="wf-drag">⠿</span>
-              <span class="wf-platform-dot" style="background:#00C7F2"></span>
-              <span class="wf-link-text"><b>Listen on Deezer</b><small>Night Signal — Original Mix</small></span>
-              <label class="wf-switch"><input type="checkbox" checked><span></span></label>
-              <button class="wf-icon-btn" title="Edit">✎</button>
-            </div>
-            <div class="wf-link-row">
-              <span class="wf-drag">⠿</span>
-              <span class="wf-platform-dot" style="background:#01FF95"></span>
-              <span class="wf-link-text"><b>Buy on Beatport</b><small>DJ-ready WAV / AIFF</small></span>
-              <label class="wf-switch"><input type="checkbox" checked><span></span></label>
-              <button class="wf-icon-btn" title="Edit">✎</button>
-            </div>
-            <div class="wf-link-row">
-              <span class="wf-drag">⠿</span>
-              <span class="wf-platform-dot" style="background:#FF7700"></span>
-              <span class="wf-link-text"><b>Follow on SoundCloud</b><small>soundcloud.com/bobby-prod</small></span>
-              <label class="wf-switch"><input type="checkbox" checked><span></span></label>
-              <button class="wf-icon-btn" title="Edit">✎</button>
-            </div>
-            <div class="wf-link-row disabled">
-              <span class="wf-drag">⠿</span>
-              <span class="wf-platform-dot" style="background:#FF0000"></span>
-              <span class="wf-link-text"><b>Subscribe on YouTube</b><small>Music videos &amp; sets</small></span>
-              <label class="wf-switch"><input type="checkbox"><span></span></label>
-              <button class="wf-icon-btn" title="Edit">✎</button>
-            </div>
-            <div class="wf-link-row">
-              <span class="wf-drag">⠿</span>
-              <span class="wf-platform-dot" style="background:linear-gradient(135deg,#feda75,#d62976,#4f5bd5)"></span>
-              <span class="wf-link-text"><b>Follow on Instagram</b><small>@bobprod</small></span>
-              <label class="wf-switch"><input type="checkbox" checked><span></span></label>
-              <button class="wf-icon-btn" title="Edit">✎</button>
-            </div>
-            <div class="wf-link-row">
-              <span class="wf-drag">⠿</span>
-              <span class="wf-platform-dot" style="background:linear-gradient(135deg,#d1382a,#f0a91f)"></span>
-              <span class="wf-link-text"><b>Get Tour Tickets</b><small>Berlin · Lyon · Amsterdam</small></span>
-              <label class="wf-switch"><input type="checkbox" checked><span></span></label>
-              <button class="wf-icon-btn" title="Edit">✎</button>
-            </div>
-          </div>
+          <div class="wf-link-list" id="link-list"></div>
 
           <div class="wf-preview-pane">
             <span class="wf-annot">live preview →</span>
@@ -433,26 +373,7 @@
 
         <table class="wf-table">
           <thead><tr><th>Default</th><th>Label</th><th>Type</th><th>Model</th><th>Key</th><th>Active</th><th></th></tr></thead>
-          <tbody id="provider-list">
-            <tr>
-              <td><input type="radio" name="default-provider" checked></td>
-              <td>OpenRouter (multi-model)</td>
-              <td><span class="wf-badge-type">openrouter</span></td>
-              <td><code>deepseek/deepseek-chat</code></td>
-              <td><code>sk-••••4f2a</code></td>
-              <td><label class="wf-switch"><input type="checkbox" checked><span></span></label></td>
-              <td class="wf-row-actions"><button class="wf-btn wf-btn-ghost wf-btn-sm">Test</button><button class="wf-icon-btn" title="Delete">✕</button></td>
-            </tr>
-            <tr>
-              <td><input type="radio" name="default-provider"></td>
-              <td>Anthropic direct</td>
-              <td><span class="wf-badge-type">anthropic</span></td>
-              <td><code>claude-sonnet-5</code></td>
-              <td><code>sk-ant-••••9c1</code></td>
-              <td><label class="wf-switch"><input type="checkbox" checked><span></span></label></td>
-              <td class="wf-row-actions"><button class="wf-btn wf-btn-ghost wf-btn-sm">Test</button><button class="wf-icon-btn" title="Delete">✕</button></td>
-            </tr>
-          </tbody>
+          <tbody id="provider-list"></tbody>
         </table>
 
         <div class="wf-inline-form" style="margin-top:16px">
