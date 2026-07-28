@@ -35,22 +35,35 @@ Full endpoint list across every module. `Auth` column: **none** (public), or **a
 | `PUT` | `/api/admin/bookings/:id` | admin | Status change only |
 | `POST` | `/api/bookings` | none | Rate-limited (brief's critical-gap #3); raises `BookingRequestSubmitted` |
 
-## Links (existing, Stage 1)
+## Links (Stage 1 + this spec's `is_enabled`)
 
 | Method | Path | Auth | Notes |
 | --- | --- | --- | --- |
 | `GET` `POST` | `/api/admin/biolinks` | admin | |
 | `PUT` `DELETE` | `/api/admin/biolinks/:id` | admin | |
-| `GET` | `/api/public/biolinks` | none | Ordered by `sort_order` |
+| `PUT` | `/api/admin/biolinks/:id/enabled` | admin | `{ isEnabled }` — new, `admin-settings.md` |
+| `GET` | `/api/public/biolinks` | none | Ordered by `sort_order`, enabled only |
 
 ## Site Configuration (`admin-settings.md`)
 
 | Method | Path | Auth | Notes |
 | --- | --- | --- | --- |
-| `GET` | `/api/admin/settings` | admin | `{ theme, seo, general }` |
+| `GET` | `/api/admin/settings` | admin | `{ theme, branding, navigation, seo, general }` |
 | `PUT` | `/api/admin/theme` | admin | |
+| `POST` `DELETE` | `/api/admin/branding/logo` | admin | Drag-and-drop upload / revert to default mark |
+| `PUT` | `/api/admin/branding/navigation` | admin | Reorder/show-hide/relabel nav items |
 | `PUT` | `/api/admin/settings/seo` | admin | |
 | `PUT` | `/api/admin/settings/general` | admin | |
+
+## Content Blocks (`content-blocks.md`)
+
+| Method | Path | Auth | Notes |
+| --- | --- | --- | --- |
+| `GET` `POST` | `/api/admin/blocks` | admin | `?page=` filter |
+| `PUT` | `/api/admin/blocks/:id` | admin | Config update, validated per `blockType` |
+| `PUT` | `/api/admin/blocks/:id/enabled` | admin | |
+| `PUT` | `/api/admin/blocks/reorder` | admin | Per-page `sortOrder` rewrite |
+| `GET` | `/api/public/blocks` | none | `?page=` filter, enabled only |
 
 ## Assistant (`assistant-llm.md`)
 
@@ -78,7 +91,7 @@ Full endpoint list across every module. `Auth` column: **none** (public), or **a
 
 | Method | Path | Auth | Notes |
 | --- | --- | --- | --- |
-| `GET` | `/api/public-config` | none | Aggregates `theme`, `seo` (current route), `tracking` (public IDs only), `chatbotEnabled` — fetched once by `PublicConfigProvider` |
+| `GET` | `/api/public-config` | none | Aggregates `theme`, `branding`, `navigation`, `seo` (current route), `tracking` (public IDs only), `chatbotEnabled` — fetched once by `PublicConfigProvider` |
 
 ## Error conventions (applies everywhere)
 

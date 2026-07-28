@@ -14,7 +14,8 @@ Stage 2/3: Admin Settings, the Chat Assistant with BYOK LLM config, and Marketin
 | Doc | Covers |
 | --- | --- |
 | [`domain-model.md`](./domain-model.md) | Bounded context map, aggregates/entities/value objects per context, full ER diagram |
-| [`admin-settings.md`](./admin-settings.md) | The Admin module: site configuration, theme, SEO, content management |
+| [`admin-settings.md`](./admin-settings.md) | The Admin module: theme/logo/nav bar branding, biolink management, SEO, general settings |
+| [`content-blocks.md`](./content-blocks.md) | The Content Blocks module: WordPress-block-editor-style activatable page sections (no third-party code execution) |
 | [`assistant-llm.md`](./assistant-llm.md) | The Chat Assistant module: visitor chat widget + admin-configurable multi-provider BYOK LLM |
 | [`marketing.md`](./marketing.md) | Marketing & Tracking module: GTM/FB/TikTok/LinkedIn, consent, AI-assisted SEO |
 | [`sequence-flows.md`](./sequence-flows.md) | End-to-end sequence diagrams for the key flows across modules |
@@ -107,7 +108,9 @@ See [`domain-model.md`](./domain-model.md) for the full context map. Short versi
 - **Touring** — published events (existing Stage 1 `events` table)
 - **Booking** — inbound booking requests (existing Stage 1 `bookings` table)
 - **Links** — the `/links` biolink page (existing Stage 1 `biolinks` table)
-- **Site Configuration** — theme, SEO defaults, general branding (Admin module)
+- **Site Configuration** — theme, logo, nav bar layout, SEO defaults (Admin module)
+- **Blocks** — activatable, admin-arranged page sections (new, this doc — the "WordPress-style
+  extensibility, without third-party code" module)
 - **Assistant** — chat widget + BYOK LLM provider config (new, this doc)
 - **Marketing** — tracking pixels, consent, server-side conversions, AI SEO assist (new, this doc)
 - **Identity** — the single admin account, session auth (existing Stage 1 `admin` table)
@@ -121,7 +124,9 @@ This spec **absorbs and completes** the brief's deferred stages:
 | Stage 1 (tracks/events/bookings/biolinks CRUD) | Unchanged — see `domain-model.md` Catalog/Touring/Booking/Links contexts |
 | Stage 2 (FB CAPI, TikTok Events, LinkedIn Insight, GTM, AI SEO) | Fully specified — see `marketing.md` |
 | Stage 3 (multi-provider BYOK LLM chat) | Fully specified — see `assistant-llm.md` |
-| "Polish" (EPK page, newsletter, analytics dashboard) | Out of scope here — not requested; flag before starting |
+| Not in the original brief: biolink admin UI, theme/logo/nav bar customization | Fully specified — see `admin-settings.md` |
+| Not in the original brief: "plugin"-style extensibility | Fully specified, scoped to activatable blocks (no third-party code) — see `content-blocks.md` |
+| "Polish" (EPK page, analytics dashboard) | Out of scope here — not requested; flag before starting |
 
 Auth providers (Google/Facebook OAuth for admin) remain **out of scope**, per the brief's own note
 that it touches session/auth code and needs separate sign-off.

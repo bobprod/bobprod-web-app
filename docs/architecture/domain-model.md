@@ -10,11 +10,12 @@ flowchart TB
         Links["Links<br/>(biolink page)"]
         Booking["Booking<br/>(inbound requests)"]
         Assistant["Assistant<br/>(chat + BYOK LLM)"]
+        Blocks["Blocks<br/>(activatable page sections)"]
     end
 
     subgraph admin["Admin-only"]
         Identity["Identity<br/>(admin auth)"]
-        SiteConfig["Site Configuration<br/>(theme, SEO, branding)"]
+        SiteConfig["Site Configuration<br/>(theme, logo, nav, SEO)"]
         Marketing["Marketing<br/>(tracking, consent, AI SEO)"]
     end
 
@@ -27,9 +28,11 @@ flowchart TB
     Identity -. guards .-> SiteConfig
     Identity -. guards .-> Marketing
     Identity -. guards .-> Assistant
+    Identity -. guards .-> Blocks
 
     Booking -- "BookingRequestSubmitted<br/>(domain event)" --> Marketing
     Marketing -- "uses configured provider" --> Assistant
+    Blocks -- "may reference" --> Catalog
     SiteConfig -.-> pub
 
     Catalog --- Shared
@@ -38,7 +41,14 @@ flowchart TB
     Booking --- Shared
     Assistant --- Shared
     Marketing --- Shared
+    Blocks --- Shared
 ```
+
+`Blocks` is the "activatable sections, WordPress-block-style" extensibility context — see
+`content-blocks.md`. Its one cross-context reference is intentionally read-only: a `merch_grid`
+block *reads* Catalog product data to render, it never writes to Catalog and Catalog has no
+awareness Blocks exists — same one-directional-dependency discipline as the Marketing→Assistant
+relationship below.
 
 Two dependencies are worth calling out because they're the ones that would otherwise tempt a
 shortcut:
@@ -61,9 +71,10 @@ shortcut:
 | Booking | Inbound booking requests + status workflow | Sending marketing conversion events (listens via domain event instead) |
 | Links | The ordered biolink list | Platform icon assets (frontend concern) |
 | Identity | Single admin credential, session issuance | Any per-user roles/permissions (out of scope — one admin account by design) |
-| Site Configuration | Theme tokens, SEO defaults per route, general branding | Tracking IDs (Marketing owns those) |
+| Site Configuration | Theme tokens, logo, nav bar layout, SEO defaults per route, general branding | Tracking IDs (Marketing owns those) |
 | Assistant | LLM provider configs (BYOK), chat conversations | Marketing's use of the LLM (Marketing calls through Assistant's port) |
 | Marketing | Tracking config per channel, consent policy, conversion event log | The LLM client itself (borrows Assistant's) |
+| Blocks | Which page sections are enabled, their config and order | The block *types themselves* — a fixed, developer-maintained catalog, not admin-authored code |
 
 ## Aggregates, entities & value objects
 
@@ -95,7 +106,7 @@ shortcut:
 ### Links
 
 - **Aggregate root: `Biolink`**
-  — `id`, `platform`, `label`, `url` (VO: `ExternalUrl`), `sortOrder`.
+  — `id`, `platform`, `label`, `url` (VO: `ExternalUrl`), `sortOrder`, `isEnabled`.
 
 ### Identity
 
@@ -110,6 +121,9 @@ shortcut:
 - **Aggregate root: `SiteSettings`** (singleton row, same key-value pattern as Stage 1's
   `settings` table)
   — `theme` (VO: `ThemeSettings { accentRed, accentGold, bgColor }`),
+  `branding` (VO: `BrandingSettings { logoUrl?, logoAlt }`),
+  `navigation` (VO: `NavigationSettings { items: NavItem[] }` where
+  `NavItem { id, label, route, isVisible, sortOrder }`),
   `seo` (VO: `SeoSettings { defaultTitle, defaultDescription, perRouteOverrides: Map<Route, SeoEntry> }`),
   `general` (VO: `GeneralSettings { siteName, timezone }`).
 
@@ -137,6 +151,13 @@ shortcut:
   write purposes but queried independently for the admin audit view)
   — `id`, `eventType` (e.g. `Lead`), `channel` (VO enum `facebook_capi | tiktok_events`),
   `payloadJson`, `status` (VO enum `sent | failed`), `sentAt`.
+
+### Blocks
+
+- **Aggregate root: `PageBlock`**
+  — `id`, `page` (VO enum: `home | bio | music | events | contact | links`), `blockType` (VO
+  enum, fixed catalog — see `content-blocks.md`), `isEnabled`, `sortOrder` (scoped per `page`),
+  `config` (JSON, shape defined per `blockType`).
 
 ## Entity-relationship diagram
 
@@ -183,6 +204,15 @@ erDiagram
         text label
         text url
         int sort_order
+        int is_enabled
+    }
+    PAGE_BLOCKS {
+        int id PK
+        text page
+        text block_type
+        int is_enabled
+        int sort_order
+        text config_json
     }
     LLM_PROVIDERS {
         int id PK
@@ -224,7 +254,8 @@ erDiagram
     BOOKINGS ||--o{ CONVERSION_EVENTS : triggers
 ```
 
-`SETTINGS` stays the generic key-value table from Stage 1 (`theme`/`seo`/`tracking`/`chatbot` keys,
-each a JSON blob) — `LLM_PROVIDERS`, `CHAT_CONVERSATIONS`, `CHAT_MESSAGES` and `CONVERSION_EVENTS`
-are genuinely relational (multiple providers, growing message history, an append-only log) so they
+`SETTINGS` stays the generic key-value table from Stage 1 (now also carrying `branding` and
+`navigation` keys alongside `theme`/`seo`/`tracking`/`chatbot`, each a JSON blob) —
+`LLM_PROVIDERS`, `CHAT_CONVERSATIONS`, `CHAT_MESSAGES`, `CONVERSION_EVENTS` and `PAGE_BLOCKS` are
+genuinely relational (multiple rows per concept, queried/filtered/ordered independently) so they
 get real tables instead of another blob. See `database-schema.md` for full DDL.

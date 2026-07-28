@@ -77,13 +77,16 @@ CREATE TABLE IF NOT EXISTS bookings (
 ## Links
 
 ```sql
--- existing, Stage 1 — unchanged
+-- amended from Stage 1 — adds is_enabled (this spec, admin-settings.md).
+-- No real deployment predates this change yet, so it's written directly into the
+-- CREATE TABLE rather than as a separate ALTER TABLE migration.
 CREATE TABLE IF NOT EXISTS biolinks (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   platform TEXT NOT NULL,
   label TEXT NOT NULL,
   url TEXT NOT NULL,
-  sort_order INTEGER NOT NULL DEFAULT 0
+  sort_order INTEGER NOT NULL DEFAULT 0,
+  is_enabled INTEGER NOT NULL DEFAULT 1
 );
 ```
 
@@ -151,6 +154,29 @@ CREATE INDEX IF NOT EXISTS idx_conversion_events_booking
 
 Same `ON DELETE SET NULL` reasoning as above — the audit log entry outlives the booking record it
 was triggered by, in case bookings are ever pruned.
+
+## Blocks (new — this spec)
+
+```sql
+CREATE TABLE IF NOT EXISTS page_blocks (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  page TEXT NOT NULL CHECK (page IN ('home', 'bio', 'music', 'events', 'contact', 'links')),
+  block_type TEXT NOT NULL CHECK (block_type IN (
+    'newsletter_signup', 'merch_grid', 'testimonials', 'press_quotes', 'upcoming_shows', 'custom_html'
+  )),
+  is_enabled INTEGER NOT NULL DEFAULT 0,
+  sort_order INTEGER NOT NULL DEFAULT 0,
+  config_json TEXT NOT NULL DEFAULT '{}'
+);
+
+CREATE INDEX IF NOT EXISTS idx_page_blocks_page
+  ON page_blocks (page, sort_order);
+```
+
+New block instances default to `is_enabled = 0` — a block is inert until an admin has configured
+and deliberately enabled it, never live with default/empty content. `sort_order` is only ever
+compared *within* the same `page` (enforced in the application layer's
+`ReorderPageBlocksCommand`, per `content-blocks.md`), which is why the index leads with `page`.
 
 ## Migration notes
 
