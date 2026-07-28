@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Righteous&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="./image-slot.js"></script>
+  <style>
+    html{scroll-behavior:smooth}
+    body{margin:0;background:#0a0a0a;font-family:'Poppins',sans-serif}
+    a{color:#f0a91f;text-decoration:none}a:hover{color:#d1382a}
+    .glass{border-radius:20px;background:rgba(255,255,255,.075);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.16)}
+    .navlink{font:500 14px 'Poppins';color:rgba(255,255,255,.75);cursor:pointer;transition:color .2s}
+    .navlink:hover{color:#f0a91f}
+    .btn-primary{background:linear-gradient(135deg,#d1382a,#f0a91f);color:#fff;font:600 14px 'Poppins';padding:14px 28px;border-radius:14px;display:inline-flex;align-items:center;gap:8px;cursor:pointer;border:none}
+    .btn-ghost{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.15);color:#fff;font:600 14px 'Poppins';padding:14px 28px;border-radius:14px;cursor:pointer}
+    .reveal{opacity:0;transform:translateY(28px);transition:opacity .7s cubic-bezier(.16,1,.3,1),transform .7s cubic-bezier(.16,1,.3,1)}
+    .reveal.in{opacity:1;transform:translateY(0)}
+    .reveal.d1{transition-delay:.08s}.reveal.d2{transition-delay:.16s}.reveal.d3{transition-delay:.24s}.reveal.d4{transition-delay:.32s}
+    @keyframes livePulse{0%{box-shadow:0 0 0 0 rgba(209,56,42,.55)}25%{box-shadow:0 0 0 8px rgba(209,56,42,0)}100%{box-shadow:0 0 0 8px rgba(209,56,42,0)}}
+    @keyframes spinSlow{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+    @keyframes discGlow{0%{box-shadow:0 20px 50px rgba(0,0,0,.5),0 0 0 0 rgba(209,56,42,.4)}30%{box-shadow:0 20px 50px rgba(0,0,0,.5),0 0 34px 8px rgba(240,169,31,.35)}100%{box-shadow:0 20px 50px rgba(0,0,0,.5),0 0 0 0 rgba(209,56,42,0)}}
+    @keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(8px)}}
+    .live-dot{animation:livePulse 1.8s ease-in-out infinite}
+    .disc-idle{animation:spinSlow 18s linear infinite}
+    .disc-active{animation:spinSlow 6s linear infinite,discGlow 2.2s ease-in-out infinite}
+    .scrollcue{animation:bounce 1.6s ease-in-out infinite}
+    .tonearm{position:absolute;top:-14px;right:6%;width:130px;height:130px;transform-origin:84% 16%;transition:transform .7s cubic-bezier(.4,0,.2,1);pointer-events:none;z-index:5}
+    .tonearm-paused{transform:rotate(-24deg)}
+    .tonearm-playing{transform:rotate(-5deg)}
+  </style>
+</helmet>
+
+<div style="background:#0a0a0a;color:#fff;overflow-x:hidden">
+
+  <nav class="glass" style="position:fixed;top:18px;left:50%;transform:translateX(-50%);width:min(920px,92%);z-index:50;display:flex;align-items:center;justify-content:space-between;padding:12px 22px;border-radius:24px">
+    <div style="display:flex;align-items:center;gap:10px">
+      <svg width="26" height="26" viewBox="0 0 256 256"><circle cx="96" cy="160" r="80" fill="#0a0a0a" stroke="#fff" stroke-width="6"></circle><circle cx="96" cy="160" r="26" fill="#d1382a"></circle><path d="M176 160 V48 C176 40 182 36 190 40 L214 52 C220 55 224 61 224 68 V72" stroke="#f0a91f" stroke-width="10" stroke-linecap="round" fill="none"></path></svg>
+      <span style="font-family:'Righteous',cursive;font-size:18px;color:#fff">bobprod</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:28px">
+      <a class="navlink" href="#music">Music</a>
+      <a class="navlink" href="#shows">Shows</a>
+      <a class="navlink" href="#shop">Shop</a>
+      <a class="navlink" href="#press">Press</a>
+    </div>
+    <a class="btn-primary" style="padding:10px 20px;font-size:13px" href="#music">Listen Now</a>
+  </nav>
+
+  <section id="hero" style="position:relative;height:100vh;min-height:640px;overflow:hidden">
+    <image-slot id="hero-bg" shape="rect" placeholder="Artist / stage photo"></image-slot>
+    <div style="position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,10,10,.55) 0%,rgba(10,10,10,.75) 55%,#0a0a0a 100%);pointer-events:none"></div>
+    <canvas ref="{{ heroCanvasRef }}" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:auto"></canvas>
+    <div style="position:absolute;left:0;right:0;bottom:12%;padding:0 8%;pointer-events:none">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px">
+        <span class="live-dot" style="width:8px;height:8px;border-radius:50%;background:#d1382a"></span>
+        <span style="font:600 12px 'Poppins';letter-spacing:.16em;text-transform:uppercase;color:#f0a91f">Live from Warehouse 12</span>
+      </div>
+      <div style="font-family:'Righteous',cursive;font-size:clamp(48px,9vw,120px);line-height:.98;color:#fff;margin-bottom:18px">NIGHT<br>SIGNAL</div>
+      <div style="font:400 17px 'Poppins';color:rgba(255,255,255,.8);max-width:520px;margin-bottom:30px">House &amp; techno from bobprod — new EP out now, tour dates across Europe this fall.</div>
+      <div style="display:flex;gap:14px;pointer-events:auto">
+        <a class="btn-primary" href="#music">▶ Listen Now</a>
+        <a class="btn-ghost" href="#shows">Tour Dates</a>
+      </div>
+    </div>
+    <div class="scrollcue" style="position:absolute;bottom:26px;left:50%;transform:translateX(-50%)">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.64)" stroke-width="2"><path d="M12 4v16M6 14l6 6 6-6"></path></svg>
+    </div>
+  </section>
+
+  <section id="music" style="background:#151210;padding:120px 8% 100px;display:flex;gap:64px;align-items:center;flex-wrap:wrap;justify-content:center">
+    <div class="reveal" style="position:relative;flex:none;width:min(340px,80vw)">
+      <div style="width:100%;aspect-ratio:1;border-radius:50%;position:relative;box-shadow:0 20px 50px rgba(0,0,0,.5);background:radial-gradient(circle at 50% 50%,#232323 0%,#1a1a1a 34%,#111 35%,#1c1c1c 46%,#111 47%,#1c1c1c 58%,#111 59%,#1c1c1c 70%,#0d0d0d 78%,#000 100%)" class="{{ discSpinClass }}">
+        <div style="position:absolute;inset:0;border-radius:50%;box-shadow:inset 0 0 50px rgba(255,255,255,.06),inset 0 0 3px rgba(255,255,255,.15)"></div>
+        <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:34%;height:34%;border-radius:50%;overflow:hidden;border:2px solid rgba(255,255,255,.15)">
+          <image-slot id="label-art" shape="circle" placeholder="Label art"></image-slot>
+        </div>
+        <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:5%;height:5%;border-radius:50%;background:#0a0a0a;box-shadow:0 0 0 2px rgba(255,255,255,.25)"></div>
+      </div>
+      <div class="{{ tonearmClass }}">
+        <div style="position:absolute;top:2px;right:2px;width:26px;height:26px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#eee,#999 60%,#555);box-shadow:0 2px 5px rgba(0,0,0,.5)"></div>
+        <div style="position:absolute;top:13px;right:13px;width:7px;height:108px;border-radius:3px;background:linear-gradient(90deg,#ddd,#999,#ddd);transform-origin:top center;transform:rotate(40deg);box-shadow:0 1px 2px rgba(0,0,0,.35)">
+          <div style="position:absolute;bottom:-7px;left:50%;transform:translateX(-50%) rotate(-14deg);width:24px;height:13px;border-radius:2px;background:#161616;box-shadow:0 1px 3px rgba(0,0,0,.5)">
+            <div style="position:absolute;bottom:1px;left:6px;width:3.5px;height:3.5px;border-radius:50%;background:#d1382a"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="reveal d1" style="flex:1;min-width:320px;max-width:480px">
+      <div style="font:600 11px 'Poppins';letter-spacing:.14em;text-transform:uppercase;color:#f0a91f;margin-bottom:10px">Now Playing</div>
+      <div style="font-family:'Righteous',cursive;font-size:36px;color:#fff;margin-bottom:6px">Night Signal</div>
+      <div style="font:400 14px 'Poppins';color:rgba(255,255,255,.64);margin-bottom:26px">bobprod · Original Mix</div>
+      <div style="margin-bottom:10px">
+        <div style="height:5px;border-radius:3px;background:rgba(255,255,255,.15);position:relative;overflow:hidden">
+          <div style="position:absolute;left:0;top:0;bottom:0;border-radius:3px;background:linear-gradient(90deg,#d1382a,#f0a91f);width:{{ progressPct }}"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-top:6px">
+          <span style="font:400 11px 'Poppins';color:rgba(255,255,255,.6)">{{ curTime }}</span>
+          <span style="font:400 11px 'Poppins';color:rgba(255,255,255,.6)">{{ totalTime }}</span>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:18px;margin-bottom:28px">
+        <button style="width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#d1382a,#f0a91f);border:none;display:flex;align-items:center;justify-content:center;cursor:pointer" onClick="{{ togglePlay }}">
+          <sc-if value="{{ isPlaying }}" hint-placeholder-val="{{ true }}">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="#fff"><rect x="6" y="5" width="4" height="14"></rect><rect x="14" y="5" width="4" height="14"></rect></svg>
+          </sc-if>
+          <sc-if value="{{ isPaused }}" hint-placeholder-val="{{ false }}">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="#fff"><path d="M8 5v14l11-7z"></path></svg>
+          </sc-if>
+        </button>
+        <span style="font:400 13px 'Poppins';color:rgba(255,255,255,.64)">New EP — 3 tracks</span>
+      </div>
+      <div style="font:600 10px 'Poppins';letter-spacing:.1em;text-transform:uppercase;color:#f0a91f;margin-bottom:10px">Long Mixes</div>
+      <div class="glass" style="padding:11px 14px;display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+        <span style="font:500 13px 'Poppins';color:#fff">Warehouse 12 — Full Set</span>
+        <span style="font:400 11px 'Poppins';color:rgba(255,255,255,.6)">1:18:32</span>
+      </div>
+      <div class="glass" style="padding:11px 14px;display:flex;align-items:center;justify-content:space-between">
+        <span style="font:500 13px 'Poppins';color:#fff">Late Night Radio Mix</span>
+        <span style="font:400 11px 'Poppins';color:rgba(255,255,255,.6)">58:04</span>
+      </div>
+    </div>
+  </section>
+
+  <section id="shows" style="padding:80px 8% 110px">
+    <div class="reveal" style="font-family:'Righteous',cursive;font-size:36px;color:#fff;margin-bottom:36px">Tour Dates</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:18px">
+      <div class="glass reveal" style="padding:20px;display:flex;align-items:center;gap:16px">
+        <div style="width:56px;text-align:center;flex:none"><div style="font:700 22px 'Poppins';color:#d1382a">14</div><div style="font:600 11px 'Poppins';letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.64)">Aug</div></div>
+        <div style="flex:1"><div style="font:600 15px 'Poppins';color:#fff">Berlin, Germany</div><div style="font:400 12px 'Poppins';color:rgba(255,255,255,.64)">Tresor Club</div></div>
+        <div style="background:#d1382a;color:#fff;font:600 12px 'Poppins';padding:10px 16px;border-radius:12px">Tickets</div>
+      </div>
+      <div class="glass reveal d1" style="padding:20px;display:flex;align-items:center;gap:16px">
+        <div style="width:56px;text-align:center;flex:none"><div style="font:700 22px 'Poppins';color:#d1382a">02</div><div style="font:600 11px 'Poppins';letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.64)">Sep</div></div>
+        <div style="flex:1"><div style="font:600 15px 'Poppins';color:#fff">Lyon, France</div><div style="font:400 12px 'Poppins';color:rgba(255,255,255,.64)">Le Sucre</div></div>
+        <div style="background:#d1382a;color:#fff;font:600 12px 'Poppins';padding:10px 16px;border-radius:12px">Tickets</div>
+      </div>
+      <div class="glass reveal d2" style="padding:20px;display:flex;align-items:center;gap:16px">
+        <div style="width:56px;text-align:center;flex:none"><div style="font:700 22px 'Poppins';color:#d1382a">21</div><div style="font:600 11px 'Poppins';letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.64)">Sep</div></div>
+        <div style="flex:1"><div style="font:600 15px 'Poppins';color:#fff">Amsterdam, NL</div><div style="font:400 12px 'Poppins';color:rgba(255,255,255,.64)">De School</div></div>
+        <div style="background:rgba(255,255,255,.16);color:rgba(255,255,255,.7);font:600 12px 'Poppins';padding:10px 16px;border-radius:12px">Soon</div>
+      </div>
+    </div>
+  </section>
+
+  <section id="shop" style="background:#151210;padding:20px 8% 110px">
+    <div class="reveal" style="font-family:'Righteous',cursive;font-size:36px;color:#fff;margin-bottom:36px">Merch</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:18px">
+      <div class="glass reveal" style="overflow:hidden">
+        <div style="aspect-ratio:1"><image-slot id="shop-1" shape="rect" placeholder="Product photo"></image-slot></div>
+        <div style="padding:14px 16px"><div style="font:500 14px 'Poppins';color:#fff">Warehouse 12 Tee</div><div style="font:600 13px 'Poppins';color:#f0a91f;margin-top:3px">€38</div></div>
+      </div>
+      <div class="glass reveal d1" style="overflow:hidden">
+        <div style="aspect-ratio:1"><image-slot id="shop-2" shape="rect" placeholder="Product photo"></image-slot></div>
+        <div style="padding:14px 16px"><div style="font:500 14px 'Poppins';color:#fff">Night Signal Vinyl</div><div style="font:600 13px 'Poppins';color:#f0a91f;margin-top:3px">€26</div></div>
+      </div>
+      <div class="glass reveal d2" style="overflow:hidden">
+        <div style="aspect-ratio:1"><image-slot id="shop-3" shape="rect" placeholder="Product photo"></image-slot></div>
+        <div style="padding:14px 16px"><div style="font:500 14px 'Poppins';color:#fff">Logo Cap</div><div style="font:600 13px 'Poppins';color:#f0a91f;margin-top:3px">€22</div></div>
+      </div>
+      <div class="glass reveal d3" style="overflow:hidden">
+        <div style="aspect-ratio:1"><image-slot id="shop-4" shape="rect" placeholder="Product photo"></image-slot></div>
+        <div style="padding:14px 16px"><div style="font:500 14px 'Poppins';color:#fff">Tour Hoodie</div><div style="font:600 13px 'Poppins';color:#f0a91f;margin-top:3px">€64</div></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="press" style="padding:20px 8% 120px;display:flex;gap:60px;flex-wrap:wrap">
+    <div class="reveal" style="flex:1;min-width:300px;max-width:420px">
+      <div style="font-family:'Righteous',cursive;font-size:36px;color:#fff;margin-bottom:16px">Press Kit</div>
+      <div style="display:flex;gap:16px;margin-bottom:20px">
+        <div style="width:76px;height:76px;border-radius:50%;overflow:hidden;flex:none"><image-slot id="epk-avatar" shape="circle" placeholder="Portrait"></image-slot></div>
+        <div style="font:400 13px 'Poppins';line-height:1.6;color:rgba(255,255,255,.74)">House &amp; techno producer and DJ, known for warehouse sets that fuse driving low-end with melodic hooks. Based in Berlin, touring across Europe.</div>
+      </div>
+      <div class="glass" style="display:flex;margin-bottom:20px">
+        <div style="flex:1;text-align:center;padding:16px 6px"><div style="font:700 20px 'Poppins';color:#fff">2.4M</div><div style="font:400 11px 'Poppins';color:rgba(255,255,255,.64)">Streams</div></div>
+        <div style="flex:1;text-align:center;padding:16px 6px;border-left:1px solid rgba(255,255,255,.18);border-right:1px solid rgba(255,255,255,.18)"><div style="font:700 20px 'Poppins';color:#fff">86K</div><div style="font:400 11px 'Poppins';color:rgba(255,255,255,.64)">Followers</div></div>
+        <div style="flex:1;text-align:center;padding:16px 6px"><div style="font:700 20px 'Poppins';color:#fff">120+</div><div style="font:400 11px 'Poppins';color:rgba(255,255,255,.64)">Shows</div></div>
+      </div>
+      <div class="glass" style="padding:16px 18px;margin-bottom:16px">
+        <div style="font:600 11px 'Poppins';letter-spacing:.08em;text-transform:uppercase;color:#f0a91f;margin-bottom:6px">Booking</div>
+        <div style="font:400 13px 'Poppins';color:rgba(255,255,255,.75)">booking@bobprod.com</div>
+      </div>
+      <a class="btn-primary" href="#press">Download Full EPK</a>
+    </div>
+    <div class="reveal d1" style="flex:1;min-width:280px;display:grid;grid-template-columns:1fr 1fr;gap:14px">
+      <div style="aspect-ratio:1;border-radius:18px;overflow:hidden;grid-row:span 2"><image-slot id="press-1" shape="rect" placeholder="Photo"></image-slot></div>
+      <div style="aspect-ratio:1;border-radius:18px;overflow:hidden"><image-slot id="press-2" shape="rect" placeholder="Photo"></image-slot></div>
+      <div style="aspect-ratio:1;border-radius:18px;overflow:hidden"><image-slot id="press-3" shape="rect" placeholder="Photo"></image-slot></div>
+    </div>
+  </section>
+
+  <footer style="border-top:1px solid rgba(255,255,255,.14);padding:44px 8%;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px">
+    <div style="display:flex;align-items:center;gap:10px">
+      <svg width="20" height="20" viewBox="0 0 256 256"><circle cx="96" cy="160" r="80" fill="#0a0a0a" stroke="#fff" stroke-width="6"></circle><circle cx="96" cy="160" r="26" fill="#d1382a"></circle></svg>
+      <span style="font-family:'Righteous',cursive;font-size:15px;color:#fff">bobprod</span>
+    </div>
+    <div style="font:400 12px 'Poppins';color:rgba(255,255,255,.56)">© 2026 bobprod. All rights reserved.</div>
+    <div style="display:flex;gap:18px">
+      <a class="navlink" href="#">SoundCloud</a>
+      <a class="navlink" href="#">Instagram</a>
+    </div>
+  </footer>
+
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { isPlaying: true, progress: 38 };
+  heroCanvasRef = React.createRef();
+
+  componentDidMount() {
+    this._t = setInterval(() => {
+      if (this.state.isPlaying) {
+        this.setState(s => ({ progress: s.progress >= 100 ? 0 : s.progress + 0.4 }));
+      }
+    }, 200);
+    this._waitForCanvas();
+    this._io = new IntersectionObserver((entries) => {
+      entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('in'); });
+    }, { threshold: 0.15 });
+    document.querySelectorAll('.reveal').forEach(el => this._io.observe(el));
+  }
+  componentWillUnmount() {
+    clearInterval(this._t);
+    if (this._raf) cancelAnimationFrame(this._raf);
+    if (this._waitRaf) cancelAnimationFrame(this._waitRaf);
+    if (this._cleanupParticles) this._cleanupParticles();
+    if (this._io) this._io.disconnect();
+  }
+
+  togglePlay = () => this.setState(s => ({ isPlaying: !s.isPlaying }));
+
+  _waitForCanvas() {
+    const canvas = this.heroCanvasRef.current;
+    const rect = canvas && canvas.getBoundingClientRect();
+    if (canvas && rect && rect.width > 0 && rect.height > 0) {
+      this.setupParticles(canvas, rect);
+    } else {
+      this._waitRaf = requestAnimationFrame(() => this._waitForCanvas());
+    }
+  }
+
+  setupParticles(canvas, rect) {
+    canvas.width = rect.width;
+    canvas.height = rect.height;
+    const ctx = canvas.getContext('2d');
+    const cols = Math.round(rect.width / 60), rows = Math.round(rect.height / 60);
+    this._particles = [];
+    for (let i = 0; i < cols; i++) for (let j = 0; j < rows; j++) {
+      this._particles.push({
+        baseX: (i + 0.5) * (canvas.width / cols),
+        baseY: (j + 0.5) * (canvas.height / rows),
+        phase: Math.random() * Math.PI * 2,
+        speed: 0.3 + Math.random() * 0.3,
+      });
+    }
+    this._pointer = { x: -999, y: -999 };
+    const onMove = (e) => {
+      const r = canvas.getBoundingClientRect();
+      const t = e.touches ? e.touches[0] : e;
+      this._pointer = { x: t.clientX - r.left, y: t.clientY - r.top };
+    };
+    const onLeave = () => { this._pointer = { x: -999, y: -999 }; };
+    canvas.addEventListener('pointermove', onMove);
+    canvas.addEventListener('pointerleave', onLeave);
+    canvas.addEventListener('touchmove', onMove, { passive: true });
+    canvas.addEventListener('touchend', onLeave);
+    this._cleanupParticles = () => {
+      canvas.removeEventListener('pointermove', onMove);
+      canvas.removeEventListener('pointerleave', onLeave);
+      canvas.removeEventListener('touchmove', onMove);
+      canvas.removeEventListener('touchend', onLeave);
+    };
+    const gold = [240, 169, 31], red = [209, 56, 42];
+    const draw = () => {
+      const t = performance.now() / 1000;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      this._particles.forEach(p => {
+        let x = p.baseX + Math.sin(t * p.speed + p.phase) * 8;
+        let y = p.baseY + Math.cos(t * p.speed * 0.8 + p.phase) * 8;
+        const dx = x - this._pointer.x, dy = y - this._pointer.y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        const influence = Math.max(0, 1 - dist / 140);
+        if (influence > 0) {
+          const push = influence * 30;
+          const ang = Math.atan2(dy, dx);
+          x += Math.cos(ang) * push; y += Math.sin(ang) * push;
+        }
+        const r = Math.round(gold[0] + (red[0] - gold[0]) * influence);
+        const g = Math.round(gold[1] + (red[1] - gold[1]) * influence);
+        const b = Math.round(gold[2] + (red[2] - gold[2]) * influence);
+        const alpha = 0.3 + influence * 0.5;
+        const radius = 1.8 + influence * 2.2;
+        ctx.beginPath();
+        ctx.arc(x, y, radius, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(${r},${g},${b},${alpha})`;
+        ctx.fill();
+      });
+      this._raf = requestAnimationFrame(draw);
+    };
+    draw();
+  }
+
+  renderVals() {
+    const { isPlaying, progress } = this.state;
+    const totalSec = 222;
+    const curSec = Math.floor((totalSec * progress) / 100);
+    const fmt = (s) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+    return {
+      heroCanvasRef: this.heroCanvasRef,
+      isPlaying, isPaused: !isPlaying,
+      togglePlay: this.togglePlay,
+      progressPct: progress + '%',
+      curTime: fmt(curSec), totalTime: fmt(totalSec),
+      discSpinClass: isPlaying ? 'disc-active' : 'disc-idle',
+      tonearmClass: isPlaying ? 'tonearm tonearm-playing' : 'tonearm tonearm-paused',
+    };
+  }
+}
+
+</script>
+</body>
+</html>

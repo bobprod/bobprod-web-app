@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Righteous&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="./image-slot.js"></script>
+  <style>
+    body{margin:0;background:#1a1817;font-family:'Poppins',sans-serif}
+    .glass{border-radius:18px;background:rgba(255,255,255,.045);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.09)}
+    .field{width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:12px 14px;color:#fff;font:400 13px 'Poppins';box-sizing:border-box}
+    .field::placeholder{color:rgba(255,255,255,.35)}
+    .chip{padding:9px 14px;border-radius:12px;font:600 12px 'Poppins';cursor:pointer;border:1px solid rgba(255,255,255,.12);transition:transform .15s ease}
+    .chip:active{transform:scale(.95)}
+    .daycell{cursor:pointer;transition:transform .12s ease}
+    .daycell:active{transform:scale(.88)}
+    .arrowbtn{width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,.06);display:flex;align-items:center;justify-content:center;cursor:pointer}
+    @keyframes screenIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+    @keyframes popIn{from{opacity:0;transform:scale(.85)}to{opacity:1;transform:scale(1)}}
+    .screen-in{animation:screenIn .4s cubic-bezier(.16,1,.3,1) both}
+    .pop-in{animation:popIn .5s cubic-bezier(.16,1,.3,1) both}
+  </style>
+</helmet>
+
+<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:40px;background:radial-gradient(ellipse at 50% 0%,#232120,#141312)">
+  <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="true" hint-size="402px,874px">
+    <div style="position:absolute;inset:0;background:#0a0a0a;border-radius:48px;overflow-y:auto">
+
+      <sc-if value="{{ isForm }}" hint-placeholder-val="{{ true }}">
+        <div class="screen-in" style="padding:60px 22px 50px">
+          <div style="font-family:'Righteous',cursive;font-size:24px;color:#fff;margin-bottom:4px">Book bobprod</div>
+          <div style="font:400 12.5px 'Poppins';color:rgba(255,255,255,.5);margin-bottom:24px">Club nights, private events &amp; festivals</div>
+
+          <div style="font:600 10px 'Poppins';letter-spacing:.1em;text-transform:uppercase;color:#f0a91f;margin-bottom:10px">Event Type</div>
+          <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:26px">
+            <sc-for list="{{ eventTypes }}" as="t" hint-placeholder-count="3">
+              <div class="chip" style="background:{{ t.bg }};color:{{ t.color }};border-color:{{ t.border }}" onClick="{{ t.onSelect }}">{{ t.label }}</div>
+            </sc-for>
+          </div>
+
+          <div style="font:600 10px 'Poppins';letter-spacing:.1em;text-transform:uppercase;color:#f0a91f;margin-bottom:10px">Preferred Date</div>
+          <div class="glass" style="padding:14px;margin-bottom:26px">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+              <div class="arrowbtn" onClick="{{ prevMonth }}">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4"><path d="M15 6l-6 6 6 6"></path></svg>
+              </div>
+              <div style="font:600 13px 'Poppins';color:#fff">{{ monthLabel }}</div>
+              <div class="arrowbtn" onClick="{{ nextMonth }}">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4"><path d="M9 6l6 6-6 6"></path></svg>
+              </div>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:4px">
+              <sc-for list="{{ weekdayLabels }}" as="w" hint-placeholder-count="7">
+                <div style="text-align:center;font:600 9.5px 'Poppins';color:rgba(255,255,255,.35)">{{ w }}</div>
+              </sc-for>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px">
+              <sc-for list="{{ calendarCells }}" as="cell" hint-placeholder-count="35">
+                <div style="aspect-ratio:1;display:flex;align-items:center;justify-content:center">
+                  <div class="daycell" style="width:78%;height:78%;border-radius:50%;display:flex;align-items:center;justify-content:center;font:500 12px 'Poppins';background:{{ cell.bg }};color:{{ cell.color }}" onClick="{{ cell.onSelect }}">{{ cell.label }}</div>
+                </div>
+              </sc-for>
+            </div>
+          </div>
+
+          <div style="font:600 10px 'Poppins';letter-spacing:.1em;text-transform:uppercase;color:#f0a91f;margin-bottom:10px">Your Details</div>
+          <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:26px">
+            <input class="field" type="text" placeholder="Full name" value="{{ name }}" onChange="{{ onNameChange }}"></input>
+            <input class="field" type="email" placeholder="Email address" value="{{ email }}" onChange="{{ onEmailChange }}"></input>
+            <input class="field" type="text" placeholder="Venue / city"></input>
+            <textarea class="field" rows="3" placeholder="Tell us about the event..." style="resize:none;font-family:'Poppins'"></textarea>
+          </div>
+
+          <button style="width:100%;border:none;padding:15px;border-radius:14px;font:600 14px 'Poppins';color:#fff;cursor:pointer;background:{{ submitBg }};opacity:{{ submitOpacity }};pointer-events:{{ submitPointer }}" onClick="{{ submitBooking }}">Request Booking</button>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isSuccess }}" hint-placeholder-val="{{ false }}">
+        <div class="pop-in" style="padding:0 30px;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center">
+          <div style="width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,#d1382a,#f0a91f);display:flex;align-items:center;justify-content:center;margin-bottom:22px">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"></path></svg>
+          </div>
+          <div style="font-family:'Righteous',cursive;font-size:20px;color:#fff;margin-bottom:8px">Request sent, {{ firstNameOrFallback }}</div>
+          <div style="font:400 13px 'Poppins';color:rgba(255,255,255,.55);margin-bottom:6px">{{ selectedDateLabel }} · {{ selectedType }}</div>
+          <div style="font:400 12.5px 'Poppins';color:rgba(255,255,255,.4);margin-bottom:30px">We'll get back to you within 48 hours.</div>
+          <button style="border:1px solid rgba(255,255,255,.15);background:rgba(255,255,255,.06);color:#fff;font:600 13px 'Poppins';padding:12px 22px;border-radius:12px;cursor:pointer" onClick="{{ resetBooking }}">Book another event</button>
+        </div>
+      </sc-if>
+
+    </div>
+  </x-import>
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = {
+    type: 'Club Night', monthOffset: 0, selectedDay: null,
+    submitted: false, name: '', email: '',
+  };
+
+  selectType = (t) => () => this.setState({ type: t });
+  selectDay = (d) => () => { if (d) this.setState({ selectedDay: d }); };
+  prevMonth = () => this.setState(s => ({ monthOffset: Math.max(0, s.monthOffset - 1) }));
+  nextMonth = () => this.setState(s => ({ monthOffset: s.monthOffset + 1 }));
+  onNameChange = (e) => this.setState({ name: e.target.value });
+  onEmailChange = (e) => this.setState({ email: e.target.value });
+  submitBooking = () => { if (this.state.selectedDay) this.setState({ submitted: true }); };
+  resetBooking = () => this.setState({ submitted: false, selectedDay: null, name: '', email: '' });
+
+  computeCalendar() {
+    const base = new Date();
+    base.setDate(1);
+    base.setMonth(base.getMonth() + this.state.monthOffset);
+    const year = base.getFullYear(), month = base.getMonth();
+    const firstDay = new Date(year, month, 1).getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const monthLabel = base.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+    const cells = [];
+    for (let i = 0; i < firstDay; i++) cells.push(null);
+    for (let d = 1; d <= daysInMonth; d++) cells.push(d);
+    return { monthLabel, cells, year, month };
+  }
+
+  renderVals() {
+    const { type, selectedDay, submitted, name, email } = this.state;
+    const { monthLabel, cells } = this.computeCalendar();
+    const active = ['#d1382a', '#f0a91f'];
+    const eventTypes = ['Club Night', 'Private Event', 'Festival'].map(label => ({
+      label,
+      onSelect: this.selectType(label),
+      bg: type === label ? `linear-gradient(135deg,${active[0]},${active[1]})` : 'transparent',
+      color: type === label ? '#fff' : 'rgba(255,255,255,.7)',
+      border: type === label ? 'transparent' : 'rgba(255,255,255,.12)',
+    }));
+    const calendarCells = cells.map((d, i) => ({
+      key: i,
+      label: d || '',
+      onSelect: this.selectDay(d),
+      bg: d && d === selectedDay ? `linear-gradient(135deg,${active[0]},${active[1]})` : 'transparent',
+      color: d && d === selectedDay ? '#fff' : (d ? 'rgba(255,255,255,.8)' : 'transparent'),
+    }));
+    return {
+      isForm: !submitted, isSuccess: submitted,
+      eventTypes, calendarCells,
+      weekdayLabels: ['S', 'M', 'T', 'W', 'T', 'F', 'S'],
+      monthLabel, prevMonth: this.prevMonth, nextMonth: this.nextMonth,
+      name, email, onNameChange: this.onNameChange, onEmailChange: this.onEmailChange,
+      submitBooking: this.submitBooking, resetBooking: this.resetBooking,
+      submitBg: selectedDay ? 'linear-gradient(135deg,#d1382a,#f0a91f)' : 'rgba(255,255,255,.1)',
+      submitOpacity: selectedDay ? '1' : '.5',
+      submitPointer: selectedDay ? 'auto' : 'none',
+      selectedType: type,
+      selectedDateLabel: selectedDay ? `${monthLabel.split(' ')[0]} ${selectedDay}` : '',
+      firstNameOrFallback: name ? name.split(' ')[0] : 'there',
+    };
+  }
+}
+
+</script>
+</body>
+</html>
