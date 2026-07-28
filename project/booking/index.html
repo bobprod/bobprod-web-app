@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>bobprod — Book a Booking Request</title>
+<meta name="description" content="Book bobprod for club nights, private events and festivals.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Righteous&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<main class="page">
+
+  <form class="screen screen-in" id="booking-form" novalidate>
+    <h1 class="title">Book bobprod</h1>
+    <p class="subtitle">Club nights, private events &amp; festivals</p>
+
+    <div class="eyebrow">Event Type</div>
+    <div class="chip-row" id="type-chips" role="radiogroup" aria-label="Event type">
+      <button type="button" class="chip active" data-type="Club Night" role="radio" aria-checked="true">Club Night</button>
+      <button type="button" class="chip" data-type="Private Event" role="radio" aria-checked="false">Private Event</button>
+      <button type="button" class="chip" data-type="Festival" role="radio" aria-checked="false">Festival</button>
+    </div>
+
+    <div class="eyebrow">Preferred Date</div>
+    <div class="glass calendar">
+      <div class="calendar-header">
+        <button type="button" class="arrowbtn" id="prev-month" aria-label="Previous month">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4"><path d="M15 6l-6 6 6 6"></path></svg>
+        </button>
+        <div class="month-label" id="month-label">—</div>
+        <button type="button" class="arrowbtn" id="next-month" aria-label="Next month">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4"><path d="M9 6l6 6-6 6"></path></svg>
+        </button>
+      </div>
+      <div class="weekday-row">
+        <span>S</span><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span>
+      </div>
+      <div class="day-grid" id="day-grid"></div>
+    </div>
+
+    <div class="eyebrow">Your Details</div>
+    <div class="fields">
+      <label class="sr-only" for="booking-name">Full name</label>
+      <input class="field" id="booking-name" type="text" placeholder="Full name" autocomplete="name">
+      <label class="sr-only" for="booking-email">Email address</label>
+      <input class="field" id="booking-email" type="email" placeholder="Email address" autocomplete="email" required>
+      <label class="sr-only" for="booking-venue">Venue / city</label>
+      <input class="field" id="booking-venue" type="text" placeholder="Venue / city">
+      <label class="sr-only" for="booking-message">Tell us about the event</label>
+      <textarea class="field" id="booking-message" rows="3" placeholder="Tell us about the event..."></textarea>
+    </div>
+
+    <button type="submit" class="submit-btn" id="submit-btn" disabled>Request Booking</button>
+  </form>
+
+  <div class="screen success-screen" id="success-screen" hidden>
+    <div class="success-icon">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"></path></svg>
+    </div>
+    <div class="success-title" id="success-title">Request sent, there</div>
+    <div class="success-meta" id="success-meta"></div>
+    <div class="success-note">We'll get back to you within 48 hours.</div>
+    <button type="button" class="reset-btn" id="reset-btn">Book another event</button>
+  </div>
+
+</main>
+
+<script src="script.js"></script>
+</body>
+</html>

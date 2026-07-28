@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>bobprod — House &amp; Techno DJ / Producer</title>
+<meta name="description" content="bobprod — house &amp; techno DJ and producer. New EP 'Night Signal' out now. Tour dates across Europe this fall.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Righteous&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<nav class="glass site-nav">
+  <div class="brand">
+    <svg width="26" height="26" viewBox="0 0 256 256" aria-hidden="true"><circle cx="96" cy="160" r="80" fill="#0a0a0a" stroke="#fff" stroke-width="6"></circle><circle cx="96" cy="160" r="26" fill="#d1382a"></circle><path d="M176 160 V48 C176 40 182 36 190 40 L214 52 C220 55 224 61 224 68 V72" stroke="#f0a91f" stroke-width="10" stroke-linecap="round" fill="none"></path></svg>
+    <span class="brand-word">bobprod</span>
+  </div>
+  <div class="nav-links">
+    <a class="navlink" href="#music">Music</a>
+    <a class="navlink" href="#shows">Shows</a>
+    <a class="navlink" href="#shop">Shop</a>
+    <a class="navlink" href="#press">Press</a>
+  </div>
+  <a class="btn-primary nav-cta" href="#music">Listen Now</a>
+</nav>
+
+<section id="hero" class="hero">
+  <div class="hero-media img-placeholder" role="img" aria-label="Artist / stage photo placeholder"></div>
+  <div class="hero-scrim"></div>
+  <canvas class="hero-canvas" id="hero-canvas" aria-hidden="true"></canvas>
+  <div class="hero-copy">
+    <div class="badge-row">
+      <span class="live-dot" aria-hidden="true"></span>
+      <span class="badge-label">Live from Warehouse 12</span>
+    </div>
+    <h1 class="hero-title">NIGHT<br>SIGNAL</h1>
+    <p class="hero-sub">House &amp; techno from bobprod — new EP out now, tour dates across Europe this fall.</p>
+    <div class="hero-actions">
+      <a class="btn-primary" href="#music">▶ Listen Now</a>
+      <a class="btn-ghost" href="#shows">Tour Dates</a>
+    </div>
+  </div>
+  <div class="scrollcue" aria-hidden="true">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.64)" stroke-width="2"><path d="M12 4v16M6 14l6 6 6-6"></path></svg>
+  </div>
+</section>
+
+<section id="music" class="section music-section">
+  <div class="reveal disc-column">
+    <div class="disc disc-active" id="disc">
+      <div class="disc-sheen"></div>
+      <div class="disc-label img-placeholder" role="img" aria-label="Label art placeholder"></div>
+      <div class="disc-pin"></div>
+    </div>
+    <div class="tonearm tonearm-playing" id="tonearm">
+      <div class="tonearm-pivot"></div>
+      <div class="tonearm-arm">
+        <div class="tonearm-head"><span class="tonearm-tip"></span></div>
+      </div>
+    </div>
+  </div>
+  <div class="reveal d1 music-info">
+    <div class="eyebrow">Now Playing</div>
+    <div class="music-title">Night Signal</div>
+    <div class="music-artist">bobprod · Original Mix</div>
+    <div class="music-progress">
+      <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
+      <div class="progress-times"><span id="cur-time">1:24</span><span id="total-time">3:42</span></div>
+    </div>
+    <div class="music-play-row">
+      <button type="button" class="play-btn" id="play-btn" aria-label="Pause">
+        <span id="play-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="#fff"><rect x="6" y="5" width="4" height="14"></rect><rect x="14" y="5" width="4" height="14"></rect></svg></span>
+      </button>
+      <span class="music-play-label">New EP — 3 tracks</span>
+    </div>
+    <div class="eyebrow long-mixes-title">Long Mixes</div>
+    <div class="glass mix-row"><span class="mix-title">Warehouse 12 — Full Set</span><span class="mix-dur">1:18:32</span></div>
+    <div class="glass mix-row"><span class="mix-title">Late Night Radio Mix</span><span class="mix-dur">58:04</span></div>
+  </div>
+</section>
+
+<section id="shows" class="section shows-section">
+  <h2 class="reveal section-title">Tour Dates</h2>
+  <div class="show-grid">
+    <div class="glass reveal show-card">
+      <div class="show-date"><span class="show-day">14</span><span class="show-month">Aug</span></div>
+      <div class="show-info"><span class="show-city">Berlin, Germany</span><span class="show-venue">Tresor Club</span></div>
+      <a class="show-pill" href="#">Tickets</a>
+    </div>
+    <div class="glass reveal d1 show-card">
+      <div class="show-date"><span class="show-day">02</span><span class="show-month">Sep</span></div>
+      <div class="show-info"><span class="show-city">Lyon, France</span><span class="show-venue">Le Sucre</span></div>
+      <a class="show-pill" href="#">Tickets</a>
+    </div>
+    <div class="glass reveal d2 show-card">
+      <div class="show-date"><span class="show-day">21</span><span class="show-month">Sep</span></div>
+      <div class="show-info"><span class="show-city">Amsterdam, NL</span><span class="show-venue">De School</span></div>
+      <span class="show-pill soon">Soon</span>
+    </div>
+  </div>
+</section>
+
+<section id="shop" class="section shop-section">
+  <h2 class="reveal section-title">Merch</h2>
+  <div class="shop-grid">
+    <div class="glass reveal product-card">
+      <div class="product-photo img-placeholder" role="img" aria-label="Product photo placeholder"></div>
+      <div class="product-info"><span class="product-name">Warehouse 12 Tee</span><span class="product-price">€38</span></div>
+    </div>
+    <div class="glass reveal d1 product-card">
+      <div class="product-photo img-placeholder" role="img" aria-label="Product photo placeholder"></div>
+      <div class="product-info"><span class="product-name">Night Signal Vinyl</span><span class="product-price">€26</span></div>
+    </div>
+    <div class="glass reveal d2 product-card">
+      <div class="product-photo img-placeholder" role="img" aria-label="Product photo placeholder"></div>
+      <div class="product-info"><span class="product-name">Logo Cap</span><span class="product-price">€22</span></div>
+    </div>
+    <div class="glass reveal d3 product-card">
+      <div class="product-photo img-placeholder" role="img" aria-label="Product photo placeholder"></div>
+      <div class="product-info"><span class="product-name">Tour Hoodie</span><span class="product-price">€64</span></div>
+    </div>
+  </div>
+</section>
+
+<section id="press" class="section press-section">
+  <div class="reveal press-main">
+    <h2 class="section-title press-title">Press Kit</h2>
+    <div class="press-header">
+      <div class="press-avatar img-placeholder" role="img" aria-label="Portrait placeholder"></div>
+      <p class="press-desc">House &amp; techno producer and DJ, known for warehouse sets that fuse driving low-end with melodic hooks. Based in Berlin, touring across Europe.</p>
+    </div>
+    <div class="glass stats-row">
+      <div class="stat"><span class="stat-num">2.4M</span><span class="stat-label">Streams</span></div>
+      <div class="stat bordered"><span class="stat-num">86K</span><span class="stat-label">Followers</span></div>
+      <div class="stat"><span class="stat-num">120+</span><span class="stat-label">Shows</span></div>
+    </div>
+    <div class="glass booking-card">
+      <div class="eyebrow">Booking</div>
+      <a class="booking-email" href="mailto:booking@bobprod.com">booking@bobprod.com</a>
+    </div>
+    <a class="btn-primary" href="#press">Download Full EPK</a>
+  </div>
+  <div class="reveal d1 press-photos">
+    <div class="press-photo tall img-placeholder" role="img" aria-label="Press photo placeholder"></div>
+    <div class="press-photo img-placeholder" role="img" aria-label="Press photo placeholder"></div>
+    <div class="press-photo img-placeholder" role="img" aria-label="Press photo placeholder"></div>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="brand">
+    <svg width="20" height="20" viewBox="0 0 256 256" aria-hidden="true"><circle cx="96" cy="160" r="80" fill="#0a0a0a" stroke="#fff" stroke-width="6"></circle><circle cx="96" cy="160" r="26" fill="#d1382a"></circle></svg>
+    <span class="brand-word small">bobprod</span>
+  </div>
+  <div class="footer-copy">© 2026 bobprod. All rights reserved.</div>
+  <div class="footer-links">
+    <a class="navlink" href="https://soundcloud.com/bobby-prod">SoundCloud</a>
+    <a class="navlink" href="#">Instagram</a>
+  </div>
+</footer>
+
+<script src="script.js"></script>
+</body>
+</html>
