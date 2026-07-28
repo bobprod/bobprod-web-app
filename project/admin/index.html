@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>bobprod — Admin (wireframe prototype)</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div class="wf-shell">
+
+  <aside class="wf-sidebar">
+    <div class="wf-brand">bobprod<span>Admin</span></div>
+
+    <nav class="wf-nav">
+      <button type="button" class="wf-navlink active" data-page="dashboard">
+        <svg class="wf-icon" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9" rx="1"></rect><rect x="14" y="3" width="7" height="5" rx="1"></rect><rect x="14" y="12" width="7" height="9" rx="1"></rect><rect x="3" y="16" width="7" height="5" rx="1"></rect></svg>
+        Dashboard
+      </button>
+
+      <div class="wf-nav-group">Content</div>
+      <button type="button" class="wf-navlink" data-page="tracks">
+        <svg class="wf-icon" viewBox="0 0 24 24"><circle cx="8" cy="18" r="3"></circle><path d="M11 18V4l9-1v13"></path><circle cx="17" cy="16" r="3"></circle></svg>
+        Tracks
+      </button>
+      <button type="button" class="wf-navlink" data-page="events">
+        <svg class="wf-icon" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"></rect><path d="M3 10h18M8 3v4M16 3v4"></path></svg>
+        Events
+      </button>
+      <button type="button" class="wf-navlink" data-page="bookings">
+        <svg class="wf-icon" viewBox="0 0 24 24"><path d="M4 4h16v16H4z"></path><path d="M4 9h16"></path></svg>
+        Bookings
+        <span class="wf-badge">3</span>
+      </button>
+      <button type="button" class="wf-navlink" data-page="links">
+        <svg class="wf-icon" viewBox="0 0 24 24"><path d="M10 13a5 5 0 007 0l3-3a5 5 0 00-7-7l-1 1"></path><path d="M14 11a5 5 0 00-7 0l-3 3a5 5 0 007 7l1-1"></path></svg>
+        Links
+      </button>
+
+      <div class="wf-nav-group">Site</div>
+      <button type="button" class="wf-navlink" data-page="branding">
+        <svg class="wf-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"></circle><path d="M12 3a6 6 0 000 12 3 3 0 010 6"></path></svg>
+        Branding
+      </button>
+      <button type="button" class="wf-navlink" data-page="blocks">
+        <svg class="wf-icon" viewBox="0 0 24 24"><rect x="3" y="3" width="8" height="8" rx="1"></rect><rect x="13" y="3" width="8" height="8" rx="1"></rect><rect x="3" y="13" width="8" height="8" rx="1"></rect><rect x="13" y="13" width="8" height="8" rx="1"></rect></svg>
+        Blocks
+      </button>
+      <button type="button" class="wf-navlink" data-page="settings">
+        <svg class="wf-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.7 1.7 0 00.3 1.9l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.7 1.7 0 00-1.9-.3 1.7 1.7 0 00-1 1.5V21a2 2 0 11-4 0v-.1a1.7 1.7 0 00-1-1.6 1.7 1.7 0 00-1.9.3l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.7 1.7 0 00.3-1.9 1.7 1.7 0 00-1.5-1H3a2 2 0 110-4h.1a1.7 1.7 0 001.5-1 1.7 1.7 0 00-.3-1.9l-.1-.1a2 2 0 112.8-2.8l.1.1a1.7 1.7 0 001.9.3H9a1.7 1.7 0 001-1.5V3a2 2 0 114 0v.1a1.7 1.7 0 001 1.5 1.7 1.7 0 001.9-.3l.1-.1a2 2 0 112.8 2.8l-.1.1a1.7 1.7 0 00-.3 1.9V9a1.7 1.7 0 001.5 1H21a2 2 0 110 4h-.1a1.7 1.7 0 00-1.5 1z"></path></svg>
+        SEO &amp; General
+      </button>
+
+      <div class="wf-nav-group">Growth</div>
+      <button type="button" class="wf-navlink" data-page="assistant">
+        <svg class="wf-icon" viewBox="0 0 24 24"><path d="M12 2a4 4 0 014 4v2a4 4 0 01-8 0V6a4 4 0 014-4z"></path><path d="M5 21v-2a7 7 0 0114 0v2"></path></svg>
+        Assistant
+      </button>
+      <button type="button" class="wf-navlink" data-page="marketing">
+        <svg class="wf-icon" viewBox="0 0 24 24"><path d="M3 11l18-7-7 18-2-8-8-3z"></path></svg>
+        Marketing
+      </button>
+    </nav>
+
+    <div class="wf-sidebar-foot">
+      <span class="wf-annot">← wireframe prototype, no real backend</span>
+    </div>
+  </aside>
+
+  <main class="wf-main">
+    <header class="wf-topbar">
+      <div id="page-title" class="wf-page-title">Dashboard</div>
+      <div class="wf-topbar-right">
+        <span class="wf-pill wf-pill-neutral">Preview mode</span>
+        <div class="wf-avatar">A</div>
+      </div>
+    </header>
+
+    <div class="wf-content">
+
+      <!-- ============ DASHBOARD ============ -->
+      <section class="wf-page active" data-page="dashboard">
+        <div class="wf-stat-row">
+          <div class="wf-stat">
+            <span class="wf-stat-label">Pending bookings</span>
+            <span class="wf-stat-value">3</span>
+            <span class="wf-stat-sub">2 new this week</span>
+          </div>
+          <div class="wf-stat">
+            <span class="wf-stat-label">Next show</span>
+            <span class="wf-stat-value">Aug 14</span>
+            <span class="wf-stat-sub">Berlin · Tresor Club</span>
+          </div>
+          <div class="wf-stat">
+            <span class="wf-stat-label">Chat assistant</span>
+            <span class="wf-stat-value"><span class="wf-dot on"></span>On</span>
+            <span class="wf-stat-sub">OpenRouter · default</span>
+          </div>
+          <div class="wf-stat">
+            <span class="wf-stat-label">Published links</span>
+            <span class="wf-stat-value">7 / 8</span>
+            <span class="wf-stat-sub">1 disabled</span>
+          </div>
+        </div>
+
+        <div class="wf-grid-2">
+          <div class="wf-card">
+            <div class="wf-card-head">
+              <h2>Recent bookings</h2>
+              <button type="button" class="wf-link-btn" data-goto="bookings">View all →</button>
+            </div>
+            <table class="wf-table">
+              <thead><tr><th>Name</th><th>Event</th><th>Date</th><th>Status</th></tr></thead>
+              <tbody>
+                <tr><td>Amine Bouarada</td><td>Festival</td><td>Jul 15</td><td><span class="wf-pill wf-pill-pending">Pending</span></td></tr>
+                <tr><td>Lena Fischer</td><td>Private Event</td><td>Aug 02</td><td><span class="wf-pill wf-pill-confirmed">Confirmed</span></td></tr>
+                <tr><td>Marco Dubois</td><td>Club Night</td><td>Sep 09</td><td><span class="wf-pill wf-pill-pending">Pending</span></td></tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="wf-card">
+            <div class="wf-card-head"><h2>Quick actions</h2></div>
+            <div class="wf-quick-actions">
+              <button type="button" class="wf-btn" data-goto="tracks">+ Add track</button>
+              <button type="button" class="wf-btn" data-goto="events">+ Add event</button>
+              <button type="button" class="wf-btn" data-goto="links">+ Add link</button>
+              <button type="button" class="wf-btn wf-btn-ghost" data-goto="blocks">Configure blocks</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ TRACKS ============ -->
+      <section class="wf-page" data-page="tracks" hidden>
+        <div class="wf-page-head">
+          <p class="wf-page-dek">Catalog context — <code>tracks</code> table.</p>
+          <button type="button" class="wf-btn wf-btn-primary" data-toggle="tracks-form">+ Add track</button>
+        </div>
+
+        <div class="wf-inline-form" id="tracks-form" hidden>
+          <div class="wf-field-row">
+            <label>Title<input type="text" placeholder="e.g. Night Signal (Original Mix)"></label>
+            <label>Artist<input type="text" value="bobprod"></label>
+          </div>
+          <div class="wf-field-row">
+            <label>Audio file<span class="wf-dropzone small">Drop audio or paste URL</span></label>
+            <label>Cover art<span class="wf-dropzone small">Drop image or paste URL</span></label>
+          </div>
+          <div class="wf-form-actions">
+            <button type="button" class="wf-btn wf-btn-primary">Save track</button>
+            <button type="button" class="wf-btn wf-btn-ghost" data-toggle="tracks-form">Cancel</button>
+          </div>
+        </div>
+
+        <table class="wf-table wf-table-drag">
+          <thead><tr><th></th><th>Title</th><th>Artist</th><th>Duration</th><th></th></tr></thead>
+          <tbody>
+            <tr><td class="wf-drag">⠿</td><td>Night Signal (Original Mix)</td><td>bobprod</td><td>3:42</td><td class="wf-row-actions"><button class="wf-icon-btn" title="Edit">✎</button><button class="wf-icon-btn" title="Delete">✕</button></td></tr>
+            <tr><td class="wf-drag">⠿</td><td>Afterglow (Extended Mix)</td><td>bobprod</td><td>5:18</td><td class="wf-row-actions"><button class="wf-icon-btn" title="Edit">✎</button><button class="wf-icon-btn" title="Delete">✕</button></td></tr>
+            <tr><td class="wf-drag">⠿</td><td>Concrete Heat</td><td>bobprod</td><td>4:07</td><td class="wf-row-actions"><button class="wf-icon-btn" title="Edit">✎</button><button class="wf-icon-btn" title="Delete">✕</button></td></tr>
+            <tr><td class="wf-drag">⠿</td><td>Warehouse 12 — Full Set</td><td>bobprod</td><td>1:18:32</td><td class="wf-row-actions"><button class="wf-icon-btn" title="Edit">✎</button><button class="wf-icon-btn" title="Delete">✕</button></td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- ============ EVENTS ============ -->
+      <section class="wf-page" data-page="events" hidden>
+        <div class="wf-page-head">
+          <p class="wf-page-dek">Touring context — <code>events</code> table.</p>
+          <button type="button" class="wf-btn wf-btn-primary" data-toggle="events-form">+ Add event</button>
+        </div>
+
+        <div class="wf-inline-form" id="events-form" hidden>
+          <div class="wf-field-row">
+            <label>Date<input type="date"></label>
+            <label>Venue<input type="text" placeholder="e.g. Tresor Club"></label>
+            <label>City<input type="text" placeholder="e.g. Berlin, Germany"></label>
+          </div>
+          <div class="wf-field-row">
+            <label>Ticket URL<input type="text" placeholder="https://..."></label>
+            <label class="wf-checkbox-label"><input type="checkbox" checked> Published</label>
+          </div>
+          <div class="wf-form-actions">
+            <button type="button" class="wf-btn wf-btn-primary">Save event</button>
+            <button type="button" class="wf-btn wf-btn-ghost" data-toggle="events-form">Cancel</button>
+          </div>
+        </div>
+
+        <table class="wf-table">
+          <thead><tr><th>Date</th><th>Venue</th><th>City</th><th>Published</th><th></th></tr></thead>
+          <tbody>
+            <tr><td>Aug 14</td><td>Tresor Club</td><td>Berlin, Germany</td><td><span class="wf-pill wf-pill-confirmed">Yes</span></td><td class="wf-row-actions"><button class="wf-icon-btn" title="Edit">✎</button><button class="wf-icon-btn" title="Delete">✕</button></td></tr>
+            <tr><td>Sep 02</td><td>Le Sucre</td><td>Lyon, France</td><td><span class="wf-pill wf-pill-confirmed">Yes</span></td><td class="wf-row-actions"><button class="wf-icon-btn" title="Edit">✎</button><button class="wf-icon-btn" title="Delete">✕</button></td></tr>
+            <tr><td>Sep 21</td><td>De School</td><td>Amsterdam, NL</td><td><span class="wf-pill wf-pill-neutral">Draft</span></td><td class="wf-row-actions"><button class="wf-icon-btn" title="Edit">✎</button><button class="wf-icon-btn" title="Delete">✕</button></td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- ============ BOOKINGS ============ -->
+      <section class="wf-page" data-page="bookings" hidden>
+        <div class="wf-page-head">
+          <p class="wf-page-dek">Booking context — read-only list, status workflow only (<code>pending → confirmed / declined</code>).</p>
+        </div>
+        <table class="wf-table">
+          <thead><tr><th>Name</th><th>Email</th><th>Event type</th><th>Requested date</th><th>Message</th><th>Status</th></tr></thead>
+          <tbody>
+            <tr>
+              <td>Amine Bouarada</td><td>amine@example.com</td><td>Festival</td><td>Jul 15, 2026</td>
+              <td class="wf-truncate">Looking for a 90-minute closing set for our...</td>
+              <td>
+                <select class="wf-status-select pending">
+                  <option value="pending" selected>Pending</option>
+                  <option value="confirmed">Confirmed</option>
+                  <option value="declined">Declined</option>
+                </select>
+              </td>
+            </tr>
+            <tr>
+              <td>Lena Fischer</td><td>lena.fischer@mail.com</td><td>Private Event</td><td>Aug 02, 2026</td>
+              <td class="wf-truncate">Birthday party, ~150 guests, warehouse space...</td>
+              <td>
+                <select class="wf-status-select confirmed">
+                  <option value="pending">Pending</option>
+                  <option value="confirmed" selected>Confirmed</option>
+                  <option value="declined">Declined</option>
+                </select>
+              </td>
+            </tr>
+            <tr>
+              <td>Marco Dubois</td><td>marco.d@clubnine.fr</td><td>Club Night</td><td>Sep 09, 2026</td>
+              <td class="wf-truncate">Resident night, 3-hour set, Friday...</td>
+              <td>
+                <select class="wf-status-select pending">
+                  <option value="pending" selected>Pending</option>
+                  <option value="confirmed">Confirmed</option>
+                  <option value="declined">Declined</option>
+                </select>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- ============ LINKS ============ -->
+      <section class="wf-page" data-page="links" hidden>
+        <div class="wf-page-head">
+          <p class="wf-page-dek">Links context — reorder, enable/disable, live preview on the right.</p>
+          <button type="button" class="wf-btn wf-btn-primary" data-toggle="link-form">+ Add link</button>
+        </div>
+
+        <div class="wf-inline-form" id="link-form" hidden>
+          <div class="wf-field-row">
+            <label>Platform
+              <select>
+                <option>Spotify</option><option>Apple Music</option><option>Deezer</option>
+                <option>Beatport</option><option>SoundCloud</option><option>YouTube</option>
+                <option>Instagram</option><option>Custom</option>
+              </select>
+            </label>
+            <label>Label<input type="text" placeholder="e.g. Listen on Spotify"></label>
+          </div>
+          <label class="wf-full">URL<input type="text" placeholder="https://..."></label>
+          <div class="wf-form-actions">
+            <button type="button" class="wf-btn wf-btn-primary">Save link</button>
+            <button type="button" class="wf-btn wf-btn-ghost" data-toggle="link-form">Cancel</button>
+          </div>
+        </div>
+
+        <div class="wf-split">
+          <div class="wf-link-list" id="link-list">
+            <div class="wf-link-row">
+              <span class="wf-drag">⠿</span>
+              <span class="wf-platform-dot" style="background:#1ED760"></span>
+              <span class="wf-link-text"><b>Listen on Spotify</b><small>Night Signal — Original Mix</small></span>
+              <label class="wf-switch"><input type="checkbox" checked><span></span></label>
+              <button class="wf-icon-btn" title="Edit">✎</button>
+            </div>
+            <div class="wf-link-row">
+              <span class="wf-drag">⠿</span>
+              <span class="wf-platform-dot" style="background:linear-gradient(135deg,#FA233B,#FB5C74)"></span>
+              <span class="wf-link-text"><b>Listen on Apple Music</b><small>Night Signal — Original Mix</small></span>
+              <label class="wf-switch"><input type="checkbox" checked><span></span></label>
+              <button class="wf-icon-btn" title="Edit">✎</button>
+            </div>
+            <div class="wf-link-row">
+              <span class="wf-drag">⠿</span>
+              <span class="wf-platform-dot" style="background:#00C7F2"></span>
+              <span class="wf-link-text"><b>Listen on Deezer</b><small>Night Signal — Original Mix</small></span>
+              <label class="wf-switch"><input type="checkbox" checked><span></span></label>
+              <button class="wf-icon-btn" title="Edit">✎</button>
+            </div>
+            <div class="wf-link-row">
+              <span class="wf-drag">⠿</span>
+              <span class="wf-platform-dot" style="background:#01FF95"></span>
+              <span class="wf-link-text"><b>Buy on Beatport</b><small>DJ-ready WAV / AIFF</small></span>
+              <label class="wf-switch"><input type="checkbox" checked><span></span></label>
+              <button class="wf-icon-btn" title="Edit">✎</button>
+            </div>
+            <div class="wf-link-row">
+              <span class="wf-drag">⠿</span>
+              <span class="wf-platform-dot" style="background:#FF7700"></span>
+              <span class="wf-link-text"><b>Follow on SoundCloud</b><small>soundcloud.com/bobby-prod</small></span>
+              <label class="wf-switch"><input type="checkbox" checked><span></span></label>
+              <button class="wf-icon-btn" title="Edit">✎</button>
+            </div>
+            <div class="wf-link-row disabled">
+              <span class="wf-drag">⠿</span>
+              <span class="wf-platform-dot" style="background:#FF0000"></span>
+              <span class="wf-link-text"><b>Subscribe on YouTube</b><small>Music videos &amp; sets</small></span>
+              <label class="wf-switch"><input type="checkbox"><span></span></label>
+              <button class="wf-icon-btn" title="Edit">✎</button>
+            </div>
+            <div class="wf-link-row">
+              <span class="wf-drag">⠿</span>
+              <span class="wf-platform-dot" style="background:linear-gradient(135deg,#feda75,#d62976,#4f5bd5)"></span>
+              <span class="wf-link-text"><b>Follow on Instagram</b><small>@bobprod</small></span>
+              <label class="wf-switch"><input type="checkbox" checked><span></span></label>
+              <button class="wf-icon-btn" title="Edit">✎</button>
+            </div>
+            <div class="wf-link-row">
+              <span class="wf-drag">⠿</span>
+              <span class="wf-platform-dot" style="background:linear-gradient(135deg,#d1382a,#f0a91f)"></span>
+              <span class="wf-link-text"><b>Get Tour Tickets</b><small>Berlin · Lyon · Amsterdam</small></span>
+              <label class="wf-switch"><input type="checkbox" checked><span></span></label>
+              <button class="wf-icon-btn" title="Edit">✎</button>
+            </div>
+          </div>
+
+          <div class="wf-preview-pane">
+            <span class="wf-annot">live preview →</span>
+            <div class="wf-phone-frame">
+              <iframe src="../biolink/index.html" title="Live biolink preview"></iframe>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ BRANDING ============ -->
+      <section class="wf-page" data-page="branding" hidden>
+        <div class="wf-page-head">
+          <p class="wf-page-dek">Site Configuration context — theme, logo, nav bar.</p>
+        </div>
+
+        <div class="wf-grid-2">
+          <div class="wf-card">
+            <div class="wf-card-head"><h2>Theme colors</h2></div>
+            <div class="wf-color-row">
+              <label>Accent — red
+                <div class="wf-color-input"><input type="color" id="clr-red" value="#d1382a"><input type="text" id="clr-red-hex" value="#d1382a"></div>
+              </label>
+              <label>Accent — gold
+                <div class="wf-color-input"><input type="color" id="clr-gold" value="#f0a91f"><input type="text" id="clr-gold-hex" value="#f0a91f"></div>
+              </label>
+              <label>Base background
+                <div class="wf-color-input"><input type="color" id="clr-bg" value="#0a0a0a"><input type="text" id="clr-bg-hex" value="#0a0a0a"></div>
+              </label>
+            </div>
+            <div class="wf-theme-preview" id="theme-preview">
+              <span>Preview</span>
+            </div>
+          </div>
+
+          <div class="wf-card">
+            <div class="wf-card-head"><h2>Logo</h2></div>
+            <div class="wf-dropzone" id="logo-dropzone">
+              <svg viewBox="0 0 24 24" class="wf-icon-lg"><path d="M12 16V4M12 4l-4 4M12 4l4 4"></path><path d="M4 16v3a2 2 0 002 2h12a2 2 0 002-2v-3"></path></svg>
+              <span>Drag &amp; drop your logo here, or click to browse</span>
+              <small>SVG, PNG or WebP · up to 2 MB</small>
+            </div>
+            <div class="wf-form-actions">
+              <button type="button" class="wf-btn wf-btn-ghost">Remove logo (use default mark)</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="wf-card">
+          <div class="wf-card-head"><h2>Navigation bar</h2></div>
+          <div class="wf-nav-editor" id="nav-editor"><!-- populated by JS --></div>
+        </div>
+      </section>
+
+      <!-- ============ BLOCKS ============ -->
+      <section class="wf-page" data-page="blocks" hidden>
+        <div class="wf-page-head">
+          <p class="wf-page-dek">Content Blocks context — activatable page sections, no third-party code.</p>
+          <button type="button" class="wf-btn wf-btn-primary" data-toggle="block-catalog">+ Add block</button>
+        </div>
+
+        <div class="wf-block-catalog" id="block-catalog" hidden>
+          <button type="button" class="wf-catalog-card" data-block="newsletter_signup">
+            <b>Newsletter Signup</b><small>Email capture form</small>
+          </button>
+          <button type="button" class="wf-catalog-card" data-block="merch_grid">
+            <b>Merch Grid</b><small>Products from the Catalog</small>
+          </button>
+          <button type="button" class="wf-catalog-card" data-block="testimonials">
+            <b>Testimonials</b><small>Quote cards</small>
+          </button>
+          <button type="button" class="wf-catalog-card" data-block="press_quotes">
+            <b>Press Quotes</b><small>Outlet logos + pull-quotes</small>
+          </button>
+          <button type="button" class="wf-catalog-card" data-block="upcoming_shows">
+            <b>Upcoming Shows</b><small>Next <em>n</em> published events</small>
+          </button>
+          <button type="button" class="wf-catalog-card" data-block="custom_html">
+            <b>Custom HTML</b><small>Sanitized rich text/embed</small>
+          </button>
+        </div>
+
+        <div class="wf-page-tabs" id="block-page-tabs">
+          <button type="button" class="wf-tab active" data-block-page="home">Home</button>
+          <button type="button" class="wf-tab" data-block-page="bio">Bio</button>
+          <button type="button" class="wf-tab" data-block-page="music">Music</button>
+          <button type="button" class="wf-tab" data-block-page="events">Events</button>
+          <button type="button" class="wf-tab" data-block-page="contact">Contact</button>
+          <button type="button" class="wf-tab" data-block-page="links">Links</button>
+        </div>
+
+        <div class="wf-block-list" id="block-list"><!-- populated by JS --></div>
+      </section>
+
+      <!-- ============ ASSISTANT ============ -->
+      <section class="wf-page" data-page="assistant" hidden>
+        <div class="wf-page-head">
+          <p class="wf-page-dek">Assistant context — chat widget on/off + BYOK LLM providers.</p>
+          <label class="wf-switch-labeled"><span>Chat widget</span><label class="wf-switch"><input type="checkbox" checked><span></span></label></label>
+        </div>
+
+        <table class="wf-table">
+          <thead><tr><th>Default</th><th>Label</th><th>Type</th><th>Model</th><th>Key</th><th>Active</th><th></th></tr></thead>
+          <tbody id="provider-list">
+            <tr>
+              <td><input type="radio" name="default-provider" checked></td>
+              <td>OpenRouter (multi-model)</td>
+              <td><span class="wf-badge-type">openrouter</span></td>
+              <td><code>deepseek/deepseek-chat</code></td>
+              <td><code>sk-••••4f2a</code></td>
+              <td><label class="wf-switch"><input type="checkbox" checked><span></span></label></td>
+              <td class="wf-row-actions"><button class="wf-btn wf-btn-ghost wf-btn-sm">Test</button><button class="wf-icon-btn" title="Delete">✕</button></td>
+            </tr>
+            <tr>
+              <td><input type="radio" name="default-provider"></td>
+              <td>Anthropic direct</td>
+              <td><span class="wf-badge-type">anthropic</span></td>
+              <td><code>claude-sonnet-5</code></td>
+              <td><code>sk-ant-••••9c1</code></td>
+              <td><label class="wf-switch"><input type="checkbox" checked><span></span></label></td>
+              <td class="wf-row-actions"><button class="wf-btn wf-btn-ghost wf-btn-sm">Test</button><button class="wf-icon-btn" title="Delete">✕</button></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="wf-inline-form" style="margin-top:16px">
+          <div class="wf-field-row">
+            <label>Provider type
+              <select><option>OpenRouter</option><option>OpenAI</option><option>Anthropic</option><option>Custom</option></select>
+            </label>
+            <label>Label<input type="text" placeholder="e.g. OpenRouter (multi-model)"></label>
+          </div>
+          <div class="wf-field-row">
+            <label>Model ID<input type="text" placeholder="e.g. deepseek/deepseek-chat"></label>
+            <label>API key<input type="password" placeholder="sk-..."></label>
+          </div>
+          <div class="wf-form-actions">
+            <button type="button" class="wf-btn wf-btn-primary">Add provider</button>
+          </div>
+        </div>
+
+        <div class="wf-card" style="margin-top:20px">
+          <div class="wf-card-head"><h2>System prompt</h2></div>
+          <textarea class="wf-textarea" rows="4">You are bobprod's assistant. Answer questions about music, tour dates and booking. Keep replies short and on-brand.</textarea>
+        </div>
+      </section>
+
+      <!-- ============ MARKETING ============ -->
+      <section class="wf-page" data-page="marketing" hidden>
+        <div class="wf-page-head">
+          <p class="wf-page-dek">Marketing context — tracking config, consent, AI-assisted SEO.</p>
+        </div>
+
+        <div class="wf-grid-2">
+          <div class="wf-card">
+            <div class="wf-card-head"><h2>Client-side tags</h2></div>
+            <label class="wf-full">GTM container ID<input type="text" placeholder="GTM-XXXXXXX"></label>
+            <label class="wf-full">LinkedIn Insight Tag ID<input type="text" placeholder="1234567"></label>
+          </div>
+          <div class="wf-card">
+            <div class="wf-card-head"><h2>Server-side conversions</h2></div>
+            <label class="wf-full">Meta Pixel ID<input type="text" placeholder="•••••••••••"></label>
+            <label class="wf-full">Meta CAPI token<input type="password" placeholder="EAAG..."></label>
+            <label class="wf-full">TikTok Pixel ID<input type="text" placeholder="•••••••••••"></label>
+            <label class="wf-full">TikTok Events API token<input type="password" placeholder="..."></label>
+          </div>
+        </div>
+
+        <div class="wf-card">
+          <div class="wf-card-head"><h2>Consent policy</h2></div>
+          <div class="wf-field-row">
+            <label class="wf-checkbox-label"><input type="checkbox" checked disabled> Necessary (always on)</label>
+            <label class="wf-checkbox-label"><input type="checkbox" checked> Analytics</label>
+            <label class="wf-checkbox-label"><input type="checkbox"> Marketing</label>
+          </div>
+        </div>
+
+        <div class="wf-card">
+          <div class="wf-card-head"><h2>Conversion audit log</h2></div>
+          <table class="wf-table">
+            <thead><tr><th>Channel</th><th>Event</th><th>Status</th><th>Sent</th></tr></thead>
+            <tbody>
+              <tr><td>Meta CAPI</td><td>Lead</td><td><span class="wf-pill wf-pill-confirmed">Sent</span></td><td>2 min ago</td></tr>
+              <tr><td>TikTok Events</td><td>SubmitForm</td><td><span class="wf-pill wf-pill-confirmed">Sent</span></td><td>2 min ago</td></tr>
+              <tr><td>Meta CAPI</td><td>Lead</td><td><span class="wf-pill wf-pill-declined">Failed</span></td><td>1 hour ago</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="wf-card">
+          <div class="wf-card-head"><h2>AI-assisted SEO</h2></div>
+          <div class="wf-field-row">
+            <label>Route
+              <select id="seo-route"><option>/</option><option>/music</option><option>/bio</option><option>/events</option><option>/contact</option><option>/links</option></select>
+            </label>
+            <button type="button" class="wf-btn wf-btn-primary" id="seo-generate-btn" style="align-self:flex-end">Generate draft</button>
+          </div>
+          <div class="wf-seo-draft" id="seo-draft" hidden>
+            <span class="wf-annot">draft — review before saving</span>
+            <label class="wf-full">Title<input type="text" id="seo-title"></label>
+            <label class="wf-full">Description<textarea id="seo-desc" rows="2"></textarea></label>
+            <div class="wf-form-actions">
+              <button type="button" class="wf-btn wf-btn-primary">Accept draft</button>
+              <button type="button" class="wf-btn wf-btn-ghost" data-toggle="seo-draft">Discard</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ SETTINGS ============ -->
+      <section class="wf-page" data-page="settings" hidden>
+        <div class="wf-page-head">
+          <p class="wf-page-dek">Site Configuration context — SEO defaults &amp; general settings.</p>
+        </div>
+
+        <div class="wf-card">
+          <div class="wf-card-head"><h2>SEO defaults</h2></div>
+          <label class="wf-full">Default title<input type="text" value="bobprod — house &amp; techno DJ / producer"></label>
+          <label class="wf-full">Default description<textarea rows="2">New EP "Night Signal" out now. Tour dates across Europe this fall.</textarea></label>
+        </div>
+
+        <div class="wf-card">
+          <div class="wf-card-head"><h2>Per-route overrides</h2></div>
+          <table class="wf-table">
+            <thead><tr><th>Route</th><th>Title override</th><th></th></tr></thead>
+            <tbody>
+              <tr><td><code>/music</code></td><td>Music — Night Signal EP &amp; DJ sets</td><td class="wf-row-actions"><button class="wf-icon-btn" title="Edit">✎</button></td></tr>
+              <tr><td><code>/events</code></td><td>Tour Dates — bobprod live</td><td class="wf-row-actions"><button class="wf-icon-btn" title="Edit">✎</button></td></tr>
+              <tr><td><code>/contact</code></td><td><em>— none —</em></td><td class="wf-row-actions"><button class="wf-icon-btn" title="Edit">✎</button></td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="wf-card">
+          <div class="wf-card-head"><h2>General</h2></div>
+          <div class="wf-field-row">
+            <label>Site name<input type="text" value="bobprod"></label>
+            <label>Timezone
+              <select><option>Europe/Berlin</option><option>Europe/Paris</option><option>UTC</option></select>
+            </label>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
