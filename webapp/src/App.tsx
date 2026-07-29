@@ -20,6 +20,7 @@ import AdminEvents from './pages/admin/AdminEvents';
 import AdminBookings from './pages/admin/AdminBookings';
 import AdminBiolinks from './pages/admin/AdminBiolinks';
 import AdminTheme from './pages/admin/AdminTheme';
+import AdminAssistant from './pages/admin/AdminAssistant';
 
 function App() {
   return (
@@ -46,6 +47,7 @@ function App() {
                 <Route path="bookings" element={<AdminBookings />} />
                 <Route path="biolinks" element={<AdminBiolinks />} />
                 <Route path="theme" element={<AdminTheme />} />
+                <Route path="assistant" element={<AdminAssistant />} />
               </Route>
 
               <Route path="*" element={<NotFound />} />

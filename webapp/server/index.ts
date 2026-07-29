@@ -7,6 +7,15 @@ import { fileURLToPath } from 'node:url';
 import { verifyCredentials, issueSessionCookie, clearSessionCookie, isSessionValid, requireAdmin } from './auth.ts';
 import { tracks, events, bookings, biolinks, theme, type Booking } from './repositories.ts';
 import { getSetting } from './db.ts';
+import {
+  providers,
+  getOrCreateConversation,
+  appendMessage,
+  listMessages,
+  chatbotSettings,
+} from './assistantRepository.ts';
+import { resolve as resolveLLMClient } from './llm/factory.ts';
+import type { ProviderType } from './llm/types.ts';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const UPLOADS_DIR = path.join(__dirname, 'uploads');
@@ -20,6 +29,10 @@ const upload = multer({ dest: UPLOADS_DIR, limits: { fileSize: 25 * 1024 * 1024 
 
 const loginLimiter = rateLimit({ windowMs: 15 * 60 * 1000, limit: 10, standardHeaders: true, legacyHeaders: false });
 const bookingLimiter = rateLimit({ windowMs: 60 * 60 * 1000, limit: 5, standardHeaders: true, legacyHeaders: false });
+// Guards the BYOK provider key from cost-abuse via the public chat endpoint.
+const chatLimiter = rateLimit({ windowMs: 60 * 1000, limit: 10, standardHeaders: true, legacyHeaders: false });
+
+const VALID_PROVIDER_TYPES: ProviderType[] = ['openrouter', 'openai', 'anthropic', 'custom'];
 
 // ---------- admin auth ----------
 
@@ -128,6 +141,118 @@ app.delete('/api/admin/biolinks/:id', requireAdmin, (req, res) => {
   res.status(204).end();
 });
 
+// ---------- admin: assistant / LLM providers ----------
+
+app.get('/api/admin/assistant/providers', requireAdmin, (_req, res) => {
+  res.json(providers.list());
+});
+
+app.post('/api/admin/assistant/providers', requireAdmin, (req, res) => {
+  const { label, providerType, apiKey, modelId, isActive } = req.body ?? {};
+  if (typeof label !== 'string' || !label.trim()) {
+    res.status(400).json({ error: 'label is required' });
+    return;
+  }
+  if (typeof providerType !== 'string' || !VALID_PROVIDER_TYPES.includes(providerType as ProviderType)) {
+    res.status(400).json({ error: `providerType must be one of ${VALID_PROVIDER_TYPES.join(', ')}` });
+    return;
+  }
+  if (typeof apiKey !== 'string' || !apiKey.trim()) {
+    res.status(400).json({ error: 'apiKey is required' });
+    return;
+  }
+  if (typeof modelId !== 'string' || !modelId.trim()) {
+    res.status(400).json({ error: 'modelId is required' });
+    return;
+  }
+  const created = providers.create({
+    label: label.trim(),
+    providerType: providerType as ProviderType,
+    apiKey: apiKey.trim(),
+    modelId: modelId.trim(),
+    isActive: isActive === undefined ? true : Boolean(isActive),
+  });
+  res.status(201).json(created);
+});
+
+app.put('/api/admin/assistant/providers/:id', requireAdmin, (req, res) => {
+  const { label, providerType, apiKey, modelId, isActive } = req.body ?? {};
+  if (providerType !== undefined && !VALID_PROVIDER_TYPES.includes(providerType as ProviderType)) {
+    res.status(400).json({ error: `providerType must be one of ${VALID_PROVIDER_TYPES.join(', ')}` });
+    return;
+  }
+  try {
+    const updated = providers.update(Number(req.params.id), {
+      label: typeof label === 'string' ? label.trim() : undefined,
+      providerType: typeof providerType === 'string' ? (providerType as ProviderType) : undefined,
+      // Empty/omitted apiKey means "keep the existing key" — enforced in the repository layer too.
+      apiKey: typeof apiKey === 'string' && apiKey.trim() !== '' ? apiKey.trim() : undefined,
+      modelId: typeof modelId === 'string' ? modelId.trim() : undefined,
+      isActive: typeof isActive === 'boolean' ? isActive : undefined,
+    });
+    res.json(updated);
+  } catch (err) {
+    res.status(404).json({ error: err instanceof Error ? err.message : 'Provider not found' });
+  }
+});
+
+app.delete('/api/admin/assistant/providers/:id', requireAdmin, (req, res) => {
+  try {
+    providers.remove(Number(req.params.id));
+    res.status(204).end();
+  } catch (err) {
+    res.status(400).json({ error: err instanceof Error ? err.message : 'Cannot delete provider' });
+  }
+});
+
+app.put('/api/admin/assistant/providers/:id/default', requireAdmin, (req, res) => {
+  try {
+    const updated = providers.setDefault(Number(req.params.id));
+    res.json(updated);
+  } catch (err) {
+    res.status(404).json({ error: err instanceof Error ? err.message : 'Provider not found' });
+  }
+});
+
+app.post('/api/admin/assistant/providers/:id/test', requireAdmin, async (req, res) => {
+  const provider = providers.getDecrypted(Number(req.params.id));
+  if (!provider) {
+    res.status(404).json({ error: 'Provider not found' });
+    return;
+  }
+  const start = Date.now();
+  try {
+    const client = resolveLLMClient(provider.providerType, provider.apiKey);
+    await client.send([{ role: 'user', content: 'Say "pong" and nothing else.' }], provider.modelId);
+    res.json({ success: true, latencyMs: Date.now() - start });
+  } catch (err) {
+    res.json({
+      success: false,
+      latencyMs: Date.now() - start,
+      error: err instanceof Error ? err.message : 'Unknown error',
+    });
+  }
+});
+
+// ---------- admin: chatbot settings ----------
+
+app.put('/api/admin/settings/chatbot', requireAdmin, (req, res) => {
+  const { enabled, systemPrompt } = req.body ?? {};
+  if (typeof enabled !== 'boolean') {
+    res.status(400).json({ error: 'enabled must be a boolean' });
+    return;
+  }
+  if (systemPrompt !== undefined && typeof systemPrompt !== 'string') {
+    res.status(400).json({ error: 'systemPrompt must be a string' });
+    return;
+  }
+  res.json(chatbotSettings.set(enabled, systemPrompt));
+});
+
+app.get('/api/admin/settings/chatbot', requireAdmin, (_req, res) => {
+  res.json(chatbotSettings.get());
+});
+
 // ---------- admin: theme ----------
 
 app.get('/api/admin/theme', requireAdmin, (_req, res) => {
@@ -184,6 +309,40 @@ app.post('/api/bookings', bookingLimiter, (req, res) => {
     message: message ?? null,
   });
   res.status(201).json(created);
+});
+
+// ---------- public: chat ----------
+
+app.post('/api/chat', chatLimiter, async (req, res) => {
+  const { enabled } = chatbotSettings.get();
+  const defaultProvider = providers.getDefaultActive();
+  // Defense in depth: if the feature is off or unconfigured, don't reveal that it exists.
+  if (!enabled || !defaultProvider) {
+    res.status(404).json({ error: 'Not found' });
+    return;
+  }
+
+  const { message, sessionId } = req.body ?? {};
+  if (typeof message !== 'string' || !message.trim() || typeof sessionId !== 'string' || !sessionId.trim()) {
+    res.status(400).json({ error: 'message and sessionId are required' });
+    return;
+  }
+
+  const conversation = getOrCreateConversation(sessionId.trim());
+  appendMessage(conversation.id, 'user', message.trim(), null, null);
+
+  const history = listMessages(conversation.id).map((m) => ({ role: m.role, content: m.content }));
+  const { systemPrompt } = chatbotSettings.get();
+
+  try {
+    const client = resolveLLMClient(defaultProvider.providerType, defaultProvider.apiKey);
+    const result = await client.send(history, defaultProvider.modelId, systemPrompt || undefined);
+    appendMessage(conversation.id, 'assistant', result.reply, defaultProvider.id, result.tokensUsed ?? null);
+    res.json({ reply: result.reply });
+  } catch (err) {
+    console.error('Chat provider call failed:', err instanceof Error ? err.message : err);
+    res.status(500).json({ error: 'The assistant is temporarily unavailable. Please try again.' });
+  }
 });
 
 app.use('/api', (_req, res) => {
