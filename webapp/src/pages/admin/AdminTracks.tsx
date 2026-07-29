@@ -4,13 +4,19 @@ import type { Track } from '../../lib/types';
 import { AdminStateBlock } from '../../components/admin/AdminStateBlock';
 
 const inputCls = 'w-full rounded-lg border border-white/10 bg-white/5 px-2.5 py-1.5 text-sm text-white';
+const fileInputCls =
+  'w-full text-xs text-white/45 file:mr-2 file:rounded-md file:border-0 file:bg-white/10 file:px-2 file:py-1 file:text-xs file:text-white/70 hover:file:bg-white/15';
 const EMPTY_FORM = { title: '', artist: 'bobprod', audio_url: '', cover_url: '' };
+
+type UploadField = 'audio_url' | 'cover_url';
 
 export default function AdminTracks() {
   const [tracks, setTracks] = useState<Track[] | null>(null);
   const [error, setError] = useState(false);
   const [form, setForm] = useState(EMPTY_FORM);
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState<Partial<Record<UploadField, boolean>>>({});
+  const [uploadError, setUploadError] = useState<Partial<Record<UploadField, string>>>({});
 
   function load() {
     setError(false);
@@ -37,6 +43,21 @@ export default function AdminTracks() {
       setForm(EMPTY_FORM);
     } finally {
       setSaving(false);
+    }
+  }
+
+  async function handleFileUpload(field: UploadField, file: File | undefined, input: HTMLInputElement) {
+    if (!file) return;
+    setUploadError((prev) => ({ ...prev, [field]: undefined }));
+    setUploading((prev) => ({ ...prev, [field]: true }));
+    try {
+      const { url } = await api.upload('/api/admin/uploads', file);
+      setForm((prev) => ({ ...prev, [field]: url }));
+    } catch {
+      setUploadError((prev) => ({ ...prev, [field]: 'Upload failed' }));
+    } finally {
+      setUploading((prev) => ({ ...prev, [field]: false }));
+      input.value = '';
     }
   }
 
@@ -75,7 +96,7 @@ export default function AdminTracks() {
 
       <form
         onSubmit={addTrack}
-        className="mb-6 grid grid-cols-[1.2fr_1fr_1.4fr_1.4fr_auto] gap-2 rounded-xl border border-white/10 bg-white/[0.03] p-4"
+        className="mb-6 grid grid-cols-[1.2fr_1fr_1.4fr_1.4fr_auto] items-start gap-2 rounded-xl border border-white/10 bg-white/[0.03] p-4"
       >
         <input
           placeholder="Title"
@@ -89,18 +110,40 @@ export default function AdminTracks() {
           onChange={(e) => setForm({ ...form, artist: e.target.value })}
           className={inputCls}
         />
-        <input
-          placeholder="Audio URL"
-          value={form.audio_url}
-          onChange={(e) => setForm({ ...form, audio_url: e.target.value })}
-          className={inputCls}
-        />
-        <input
-          placeholder="Cover URL (optional)"
-          value={form.cover_url}
-          onChange={(e) => setForm({ ...form, cover_url: e.target.value })}
-          className={inputCls}
-        />
+        <div className="flex flex-col gap-1">
+          <input
+            placeholder="Audio URL"
+            value={form.audio_url}
+            onChange={(e) => setForm({ ...form, audio_url: e.target.value })}
+            className={inputCls}
+          />
+          <input
+            type="file"
+            accept="audio/*"
+            disabled={uploading.audio_url}
+            onChange={(e) => handleFileUpload('audio_url', e.target.files?.[0], e.target)}
+            className={fileInputCls}
+          />
+          {uploading.audio_url && <p className="text-xs text-white/45">Uploading…</p>}
+          {uploadError.audio_url && <p className="text-xs text-red-400">{uploadError.audio_url}</p>}
+        </div>
+        <div className="flex flex-col gap-1">
+          <input
+            placeholder="Cover URL (optional)"
+            value={form.cover_url}
+            onChange={(e) => setForm({ ...form, cover_url: e.target.value })}
+            className={inputCls}
+          />
+          <input
+            type="file"
+            accept="image/*"
+            disabled={uploading.cover_url}
+            onChange={(e) => handleFileUpload('cover_url', e.target.files?.[0], e.target)}
+            className={fileInputCls}
+          />
+          {uploading.cover_url && <p className="text-xs text-white/45">Uploading…</p>}
+          {uploadError.cover_url && <p className="text-xs text-red-400">{uploadError.cover_url}</p>}
+        </div>
         <button
           type="submit"
           disabled={saving}
