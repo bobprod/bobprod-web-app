@@ -2,6 +2,7 @@ import { Outlet } from 'react-router-dom';
 import { Header } from './Header';
 import { Footer } from './Footer';
 import { ErrorBoundary } from './ErrorBoundary';
+import { ChatWidget } from './ChatWidget';
 
 export function Layout() {
   return (
@@ -13,6 +14,7 @@ export function Layout() {
         </ErrorBoundary>
       </main>
       <Footer />
+      <ChatWidget />
     </div>
   );
 }

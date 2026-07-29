@@ -48,3 +48,21 @@ export interface PublicConfig {
   chatbotEnabled: boolean;
   theme: Theme;
 }
+
+export type LLMProviderType = 'openrouter' | 'openai' | 'anthropic' | 'custom';
+
+export interface LLMProvider {
+  id: number;
+  label: string;
+  providerType: LLMProviderType;
+  modelId: string;
+  isActive: boolean;
+  isDefault: boolean;
+  createdAt: string;
+  maskedApiKey: string;
+}
+
+export interface ChatbotSettings {
+  enabled: boolean;
+  systemPrompt: string;
+}

@@ -7,6 +7,7 @@ const NAV = [
   { to: '/admin/bookings', label: 'Bookings' },
   { to: '/admin/biolinks', label: 'Links' },
   { to: '/admin/theme', label: 'Branding' },
+  { to: '/admin/assistant', label: 'Assistant' },
 ];
 
 export default function AdminLayout() {
