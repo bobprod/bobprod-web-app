@@ -3,11 +3,16 @@ import { api } from '../../lib/api';
 import type { Theme } from '../../lib/types';
 
 const DEFAULT_THEME: Theme = { accentRed: '#d1382a', accentGold: '#f0a91f', bgColor: '#0a0a0a' };
+const inputCls = 'w-full rounded-lg border border-white/10 bg-white/5 px-2.5 py-1.5 text-sm text-white';
+const fileInputCls =
+  'w-full text-xs text-white/45 file:mr-2 file:rounded-md file:border-0 file:bg-white/10 file:px-2 file:py-1 file:text-xs file:text-white/70 hover:file:bg-white/15';
 
 export default function AdminTheme() {
   const [theme, setTheme] = useState<Theme>(DEFAULT_THEME);
   const [loaded, setLoaded] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
 
   useEffect(() => {
     api
@@ -20,6 +25,22 @@ export default function AdminTheme() {
     setSaved(false);
     await api.put('/api/admin/theme', theme);
     setSaved(true);
+  }
+
+  async function handleAvatarUpload(file: File | undefined, input: HTMLInputElement) {
+    if (!file) return;
+    setUploadError(null);
+    setUploading(true);
+    try {
+      const { url } = await api.upload('/api/admin/uploads', file);
+      setSaved(false);
+      setTheme((prev) => ({ ...prev, avatarUrl: url }));
+    } catch {
+      setUploadError('Upload failed');
+    } finally {
+      setUploading(false);
+      input.value = '';
+    }
   }
 
   if (!loaded) return null;
@@ -62,6 +83,36 @@ export default function AdminTheme() {
         className="mb-6 h-24 rounded-xl border border-white/10"
         style={{ background: `linear-gradient(135deg, ${theme.accentRed}, ${theme.accentGold})` }}
       />
+
+      <div className="mb-6 flex items-center gap-4 rounded-xl border border-white/10 bg-white/[0.03] p-4">
+        <div className="h-16 w-16 flex-none overflow-hidden rounded-full border border-white/15 bg-gradient-to-br from-white/10 to-white/[0.03]">
+          {theme.avatarUrl && (
+            <img src={theme.avatarUrl} alt="" className="h-full w-full object-cover" />
+          )}
+        </div>
+        <div className="min-w-0 flex-1">
+          <p className="mb-1 text-sm text-white/70">Photo / avatar</p>
+          <input
+            placeholder="https://…"
+            value={theme.avatarUrl ?? ''}
+            onChange={(e) => {
+              setSaved(false);
+              setTheme({ ...theme, avatarUrl: e.target.value });
+            }}
+            className={`${inputCls} mb-1.5`}
+          />
+          <input
+            type="file"
+            accept="image/*"
+            disabled={uploading}
+            onChange={(e) => handleAvatarUpload(e.target.files?.[0], e.target)}
+            className={fileInputCls}
+          />
+          {uploading && <p className="mt-1 text-xs text-white/45">Uploading…</p>}
+          {uploadError && <p className="mt-1 text-xs text-red-400">{uploadError}</p>}
+          <p className="mt-1.5 text-xs text-white/40">Shown on the public Links page.</p>
+        </div>
+      </div>
 
       <button
         type="button"

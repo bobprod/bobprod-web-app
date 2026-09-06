@@ -3,6 +3,7 @@ import cookieParser from 'cookie-parser';
 import rateLimit from 'express-rate-limit';
 import multer from 'multer';
 import path from 'node:path';
+import crypto from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import { verifyCredentials, issueSessionCookie, clearSessionCookie, isSessionValid, requireAdmin } from './auth.ts';
 import {
@@ -37,7 +38,17 @@ app.use(express.json());
 app.use(cookieParser());
 app.use('/uploads', express.static(UPLOADS_DIR));
 
-const upload = multer({ dest: UPLOADS_DIR, limits: { fileSize: 25 * 1024 * 1024 } });
+const uploadStorage = multer.diskStorage({
+  destination: UPLOADS_DIR,
+  // Keep the original extension so express.static can infer a correct Content-Type
+  // (a bare hash filename is served as application/octet-stream, which browsers may
+  // refuse to play/render as audio or images).
+  filename: (_req, file, cb) => {
+    const ext = path.extname(file.originalname);
+    cb(null, `${crypto.randomUUID()}${ext}`);
+  },
+});
+const upload = multer({ storage: uploadStorage, limits: { fileSize: 25 * 1024 * 1024 } });
 
 const loginLimiter = rateLimit({ windowMs: 15 * 60 * 1000, limit: 10, standardHeaders: true, legacyHeaders: false });
 const bookingLimiter = rateLimit({ windowMs: 60 * 60 * 1000, limit: 5, standardHeaders: true, legacyHeaders: false });

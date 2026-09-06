@@ -40,6 +40,7 @@ export interface Theme {
   accentRed: string;
   accentGold: string;
   bgColor: string;
+  avatarUrl?: string;
 }
 
 export interface PublicConfig {
