@@ -1,4 +1,5 @@
 import { db, getSetting, setSetting } from './db.ts';
+import { sanitizeBlockHtml } from './sanitize.ts';
 
 export interface Track {
   id: number;
@@ -171,5 +172,151 @@ export const theme = {
   set(next: Theme) {
     setSetting('theme', next);
     return next;
+  },
+};
+
+// ---------- page blocks ----------
+
+export type PageSlug = 'home' | 'bio' | 'music' | 'events' | 'contact' | 'links';
+export type BlockType =
+  | 'newsletter_signup'
+  | 'merch_grid'
+  | 'testimonials'
+  | 'press_quotes'
+  | 'upcoming_shows'
+  | 'custom_html';
+
+export const PAGE_SLUGS: PageSlug[] = ['home', 'bio', 'music', 'events', 'contact', 'links'];
+export const BLOCK_TYPES: BlockType[] = [
+  'newsletter_signup',
+  'merch_grid',
+  'testimonials',
+  'press_quotes',
+  'upcoming_shows',
+  'custom_html',
+];
+
+interface PageBlockRow {
+  id: number;
+  page: PageSlug;
+  block_type: BlockType;
+  is_enabled: number;
+  sort_order: number;
+  config: string;
+}
+
+export interface PageBlock {
+  id: number;
+  page: PageSlug;
+  blockType: BlockType;
+  isEnabled: boolean;
+  sortOrder: number;
+  config: Record<string, unknown>;
+}
+
+function toPageBlock(row: PageBlockRow): PageBlock {
+  let config: Record<string, unknown>;
+  try {
+    config = JSON.parse(row.config);
+  } catch {
+    config = {};
+  }
+  return {
+    id: row.id,
+    page: row.page,
+    blockType: row.block_type,
+    isEnabled: !!row.is_enabled,
+    sortOrder: row.sort_order,
+    config,
+  };
+}
+
+function getBlockRow(id: number): PageBlockRow | undefined {
+  return db.prepare('SELECT * FROM page_blocks WHERE id = ?').get(id) as unknown as
+    | PageBlockRow
+    | undefined;
+}
+
+export const pageBlocks = {
+  list(page?: PageSlug): PageBlock[] {
+    const rows = page
+      ? (db
+          .prepare('SELECT * FROM page_blocks WHERE page = ? ORDER BY sort_order ASC, id ASC')
+          .all(page) as unknown as PageBlockRow[])
+      : (db.prepare('SELECT * FROM page_blocks ORDER BY page ASC, sort_order ASC, id ASC').all() as unknown as PageBlockRow[]);
+    return rows.map(toPageBlock);
+  },
+
+  listEnabled(page: PageSlug): PageBlock[] {
+    const rows = db
+      .prepare(
+        'SELECT * FROM page_blocks WHERE page = ? AND is_enabled = 1 ORDER BY sort_order ASC, id ASC',
+      )
+      .all(page) as unknown as PageBlockRow[];
+    return rows.map(toPageBlock);
+  },
+
+  create(page: PageSlug, blockType: BlockType): PageBlock {
+    if (!PAGE_SLUGS.includes(page)) throw new Error(`Invalid page: ${page}`);
+    if (!BLOCK_TYPES.includes(blockType)) throw new Error(`Invalid blockType: ${blockType}`);
+    const { count } = db
+      .prepare('SELECT COUNT(*) AS count FROM page_blocks WHERE page = ?')
+      .get(page) as unknown as { count: number };
+    const info = db
+      .prepare(
+        'INSERT INTO page_blocks (page, block_type, is_enabled, sort_order, config) VALUES (?, ?, 0, ?, ?)',
+      )
+      .run(page, blockType, count, '{}');
+    const row = getBlockRow(info.lastInsertRowid as number);
+    if (!row) throw new Error('Failed to create block');
+    return toPageBlock(row);
+  },
+
+  updateConfig(id: number, config: Record<string, unknown>): PageBlock {
+    const current = getBlockRow(id);
+    if (!current) throw new Error('Block not found');
+    const nextConfig =
+      current.block_type === 'custom_html' && typeof config.html === 'string'
+        ? { ...config, html: sanitizeBlockHtml(config.html) }
+        : config;
+    db.prepare('UPDATE page_blocks SET config = ? WHERE id = ?').run(
+      JSON.stringify(nextConfig),
+      id,
+    );
+    const updated = getBlockRow(id);
+    if (!updated) throw new Error('Block not found');
+    return toPageBlock(updated);
+  },
+
+  setEnabled(id: number, enabled: boolean): PageBlock {
+    const current = getBlockRow(id);
+    if (!current) throw new Error('Block not found');
+    db.prepare('UPDATE page_blocks SET is_enabled = ? WHERE id = ?').run(enabled ? 1 : 0, id);
+    const updated = getBlockRow(id);
+    if (!updated) throw new Error('Block not found');
+    return toPageBlock(updated);
+  },
+
+  /** Rewrites sort_order 0..n for one page's blocks only — never touches other pages' ordering. */
+  reorder(page: PageSlug, orderedIds: number[]): PageBlock[] {
+    db.exec('BEGIN');
+    try {
+      orderedIds.forEach((id, index) => {
+        db.prepare('UPDATE page_blocks SET sort_order = ? WHERE id = ? AND page = ?').run(
+          index,
+          id,
+          page,
+        );
+      });
+      db.exec('COMMIT');
+    } catch (err) {
+      db.exec('ROLLBACK');
+      throw err;
+    }
+    return pageBlocks.list(page);
+  },
+
+  remove(id: number) {
+    db.prepare('DELETE FROM page_blocks WHERE id = ?').run(id);
   },
 };

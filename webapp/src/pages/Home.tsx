@@ -1,6 +1,7 @@
 import { Helmet } from 'react-helmet-async';
 import { Hero } from '../components/Hero';
 import { usePublicConfig } from '../lib/publicConfig';
+import { BlockList } from '../components/blocks/BlockList';
 
 export default function Home() {
   const config = usePublicConfig();
@@ -14,6 +15,7 @@ export default function Home() {
         />
       </Helmet>
       <Hero />
+      <BlockList page="home" />
     </>
   );
 }

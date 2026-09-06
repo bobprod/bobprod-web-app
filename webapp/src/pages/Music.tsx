@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { api } from '../lib/api';
 import type { Track } from '../lib/types';
+import { BlockList } from '../components/blocks/BlockList';
 
 export default function Music() {
   const [tracks, setTracks] = useState<Track[] | null>(null);
@@ -15,7 +16,8 @@ export default function Music() {
   }, []);
 
   return (
-    <section className="mx-auto w-[min(760px,92vw)] py-24">
+    <>
+      <section className="mx-auto w-[min(760px,92vw)] py-24">
       <Helmet>
         <title>Music — bobprod</title>
       </Helmet>
@@ -68,6 +70,9 @@ export default function Music() {
           soundcloud.com/bobby-prod →
         </a>
       </div>
-    </section>
+      </section>
+
+      <BlockList page="music" />
+    </>
   );
 }

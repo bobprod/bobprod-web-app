@@ -66,3 +66,79 @@ export interface ChatbotSettings {
   enabled: boolean;
   systemPrompt: string;
 }
+
+// ---------- content blocks ----------
+
+export type PageSlug = 'home' | 'bio' | 'music' | 'events' | 'contact' | 'links';
+
+export type BlockType =
+  | 'newsletter_signup'
+  | 'merch_grid'
+  | 'testimonials'
+  | 'press_quotes'
+  | 'upcoming_shows'
+  | 'custom_html';
+
+export const PAGE_SLUGS: PageSlug[] = ['home', 'bio', 'music', 'events', 'contact', 'links'];
+export const BLOCK_TYPES: BlockType[] = [
+  'newsletter_signup',
+  'merch_grid',
+  'testimonials',
+  'press_quotes',
+  'upcoming_shows',
+  'custom_html',
+];
+
+export const BLOCK_TYPE_LABELS: Record<BlockType, string> = {
+  newsletter_signup: 'Newsletter signup',
+  merch_grid: 'Merch grid',
+  testimonials: 'Testimonials',
+  press_quotes: 'Press quotes',
+  upcoming_shows: 'Upcoming shows',
+  custom_html: 'Custom HTML',
+};
+
+export interface NewsletterSignupConfig {
+  headline?: string;
+  buttonLabel?: string;
+}
+
+// Deviation from docs/architecture/content-blocks.md: that spec's { productIds } shape assumes a
+// Catalog/product module that doesn't exist in this codebase. Self-contained inline items instead,
+// matching the testimonials/press_quotes pattern.
+export interface MerchGridConfig {
+  items: { name: string; price: string; imageUrl?: string; url?: string }[];
+}
+
+export interface TestimonialsConfig {
+  quotes: { text: string; attribution: string }[];
+}
+
+export interface PressQuotesConfig {
+  items: { outlet: string; quote: string; logoUrl?: string }[];
+}
+
+export interface UpcomingShowsConfig {
+  limit: number;
+}
+
+export interface CustomHtmlConfig {
+  html: string;
+}
+
+export type BlockConfig =
+  | NewsletterSignupConfig
+  | MerchGridConfig
+  | TestimonialsConfig
+  | PressQuotesConfig
+  | UpcomingShowsConfig
+  | CustomHtmlConfig;
+
+export interface PageBlock {
+  id: number;
+  page: PageSlug;
+  blockType: BlockType;
+  isEnabled: boolean;
+  sortOrder: number;
+  config: Record<string, unknown>;
+}

@@ -6,6 +6,7 @@ const NAV = [
   { to: '/admin/events', label: 'Events' },
   { to: '/admin/bookings', label: 'Bookings' },
   { to: '/admin/biolinks', label: 'Links' },
+  { to: '/admin/blocks', label: 'Blocks' },
   { to: '/admin/theme', label: 'Branding' },
   { to: '/admin/assistant', label: 'Assistant' },
 ];

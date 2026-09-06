@@ -89,6 +89,17 @@ db.exec(`
     created_at TEXT NOT NULL DEFAULT (datetime('now'))
   );
   CREATE INDEX IF NOT EXISTS idx_chat_messages_conversation ON chat_messages (conversation_id);
+
+  CREATE TABLE IF NOT EXISTS page_blocks (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    page TEXT NOT NULL CHECK (page IN ('home', 'bio', 'music', 'events', 'contact', 'links')),
+    block_type TEXT NOT NULL CHECK (block_type IN
+      ('newsletter_signup', 'merch_grid', 'testimonials', 'press_quotes', 'upcoming_shows', 'custom_html')),
+    is_enabled INTEGER NOT NULL DEFAULT 0,
+    sort_order INTEGER NOT NULL DEFAULT 0,
+    config TEXT NOT NULL DEFAULT '{}'
+  );
+  CREATE INDEX IF NOT EXISTS idx_page_blocks_page ON page_blocks (page, sort_order);
 `);
 
 // Seed the single admin account from env on first boot.

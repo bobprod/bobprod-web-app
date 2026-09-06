@@ -5,7 +5,19 @@ import multer from 'multer';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { verifyCredentials, issueSessionCookie, clearSessionCookie, isSessionValid, requireAdmin } from './auth.ts';
-import { tracks, events, bookings, biolinks, theme, type Booking } from './repositories.ts';
+import {
+  tracks,
+  events,
+  bookings,
+  biolinks,
+  theme,
+  pageBlocks,
+  PAGE_SLUGS,
+  BLOCK_TYPES,
+  type Booking,
+  type PageSlug,
+  type BlockType,
+} from './repositories.ts';
 import { getSetting } from './db.ts';
 import {
   providers,
@@ -262,6 +274,79 @@ app.put('/api/admin/theme', requireAdmin, (req, res) => {
   res.json(theme.set(req.body));
 });
 
+// ---------- admin: page blocks ----------
+
+app.get('/api/admin/blocks', requireAdmin, (req, res) => {
+  const page = req.query.page as string | undefined;
+  if (page !== undefined && !PAGE_SLUGS.includes(page as PageSlug)) {
+    res.status(400).json({ error: `page must be one of ${PAGE_SLUGS.join(', ')}` });
+    return;
+  }
+  res.json(pageBlocks.list(page as PageSlug | undefined));
+});
+
+app.post('/api/admin/blocks', requireAdmin, (req, res) => {
+  const { page, blockType } = req.body ?? {};
+  if (!PAGE_SLUGS.includes(page)) {
+    res.status(400).json({ error: `page must be one of ${PAGE_SLUGS.join(', ')}` });
+    return;
+  }
+  if (!BLOCK_TYPES.includes(blockType)) {
+    res.status(400).json({ error: `blockType must be one of ${BLOCK_TYPES.join(', ')}` });
+    return;
+  }
+  try {
+    const created = pageBlocks.create(page as PageSlug, blockType as BlockType);
+    res.status(201).json(created);
+  } catch (err) {
+    res.status(400).json({ error: err instanceof Error ? err.message : 'Cannot create block' });
+  }
+});
+
+app.put('/api/admin/blocks/reorder', requireAdmin, (req, res) => {
+  const { page, orderedIds } = req.body ?? {};
+  if (!PAGE_SLUGS.includes(page)) {
+    res.status(400).json({ error: `page must be one of ${PAGE_SLUGS.join(', ')}` });
+    return;
+  }
+  if (!Array.isArray(orderedIds) || !orderedIds.every((id) => typeof id === 'number')) {
+    res.status(400).json({ error: 'orderedIds must be an array of numbers' });
+    return;
+  }
+  res.json(pageBlocks.reorder(page as PageSlug, orderedIds));
+});
+
+app.put('/api/admin/blocks/:id', requireAdmin, (req, res) => {
+  const config = req.body?.config;
+  if (typeof config !== 'object' || config === null) {
+    res.status(400).json({ error: 'config must be an object' });
+    return;
+  }
+  try {
+    res.json(pageBlocks.updateConfig(Number(req.params.id), config));
+  } catch (err) {
+    res.status(404).json({ error: err instanceof Error ? err.message : 'Block not found' });
+  }
+});
+
+app.put('/api/admin/blocks/:id/enabled', requireAdmin, (req, res) => {
+  const { enabled } = req.body ?? {};
+  if (typeof enabled !== 'boolean') {
+    res.status(400).json({ error: 'enabled must be a boolean' });
+    return;
+  }
+  try {
+    res.json(pageBlocks.setEnabled(Number(req.params.id), enabled));
+  } catch (err) {
+    res.status(404).json({ error: err instanceof Error ? err.message : 'Block not found' });
+  }
+});
+
+app.delete('/api/admin/blocks/:id', requireAdmin, (req, res) => {
+  pageBlocks.remove(Number(req.params.id));
+  res.status(204).end();
+});
+
 // ---------- admin: uploads ----------
 
 app.post('/api/admin/uploads', requireAdmin, upload.single('file'), (req, res) => {
@@ -282,6 +367,14 @@ app.get('/api/public/events', (_req, res) => {
 });
 app.get('/api/public/biolinks', (_req, res) => {
   res.json(biolinks.listEnabled());
+});
+app.get('/api/public/blocks', (req, res) => {
+  const page = req.query.page as string | undefined;
+  if (!page || !PAGE_SLUGS.includes(page as PageSlug)) {
+    res.status(400).json({ error: `page must be one of ${PAGE_SLUGS.join(', ')}` });
+    return;
+  }
+  res.json(pageBlocks.listEnabled(page as PageSlug));
 });
 
 app.get('/api/public-config', (_req, res) => {

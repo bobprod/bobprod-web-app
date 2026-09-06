@@ -1,6 +1,7 @@
 import { useState, type FormEvent } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { api, ApiError } from '../lib/api';
+import { BlockList } from '../components/blocks/BlockList';
 
 const EVENT_TYPES = ['Club Night', 'Private Event', 'Festival'];
 
@@ -43,6 +44,7 @@ export default function Contact() {
   }
 
   return (
+    <>
     <section className="mx-auto w-[min(560px,92vw)] py-24">
       <Helmet>
         <title>Booking — bobprod</title>
@@ -125,5 +127,8 @@ export default function Contact() {
         </button>
       </form>
     </section>
+
+    <BlockList page="contact" />
+    </>
   );
 }

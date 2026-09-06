@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { api } from '../lib/api';
 import type { Biolink } from '../lib/types';
+import { BlockList } from '../components/blocks/BlockList';
 
 const PLATFORM_COLORS: Record<string, string> = {
   spotify: '#1ED760',
@@ -31,6 +32,7 @@ export default function Links() {
   }, []);
 
   return (
+    <>
     <section className="mx-auto flex w-[min(460px,92vw)] flex-col items-center px-2 py-16 text-center">
       <Helmet>
         <title>bobprod — Links</title>
@@ -122,5 +124,8 @@ export default function Links() {
 
       <p className="mt-8 text-[10.5px] text-white/30">&copy; {new Date().getFullYear()} bobprod</p>
     </section>
+
+    <BlockList page="links" />
+    </>
   );
 }

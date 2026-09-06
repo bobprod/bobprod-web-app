@@ -19,6 +19,7 @@ import AdminTracks from './pages/admin/AdminTracks';
 import AdminEvents from './pages/admin/AdminEvents';
 import AdminBookings from './pages/admin/AdminBookings';
 import AdminBiolinks from './pages/admin/AdminBiolinks';
+import AdminBlocks from './pages/admin/AdminBlocks';
 import AdminTheme from './pages/admin/AdminTheme';
 import AdminAssistant from './pages/admin/AdminAssistant';
 
@@ -46,6 +47,7 @@ function App() {
                 <Route path="events" element={<AdminEvents />} />
                 <Route path="bookings" element={<AdminBookings />} />
                 <Route path="biolinks" element={<AdminBiolinks />} />
+                <Route path="blocks" element={<AdminBlocks />} />
                 <Route path="theme" element={<AdminTheme />} />
                 <Route path="assistant" element={<AdminAssistant />} />
               </Route>

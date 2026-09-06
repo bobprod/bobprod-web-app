@@ -2,15 +2,8 @@ import { useEffect, useState } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { api } from '../lib/api';
 import type { EventItem } from '../lib/types';
-
-function formatDate(iso: string) {
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return { day: '--', month: '' };
-  return {
-    day: d.toLocaleDateString(undefined, { day: '2-digit' }),
-    month: d.toLocaleDateString(undefined, { month: 'short' }),
-  };
-}
+import { formatEventDate } from '../lib/date';
+import { BlockList } from '../components/blocks/BlockList';
 
 export default function Events() {
   const [events, setEvents] = useState<EventItem[] | null>(null);
@@ -49,7 +42,7 @@ export default function Events() {
           </div>
         )}
         {events?.map((event) => {
-          const { day, month } = formatDate(event.event_date);
+          const { day, month } = formatEventDate(event.event_date);
           return (
             <div
               key={event.id}
@@ -81,6 +74,8 @@ export default function Events() {
           );
         })}
       </div>
+
+      <BlockList page="events" />
     </section>
   );
 }
