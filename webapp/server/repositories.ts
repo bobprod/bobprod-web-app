@@ -175,6 +175,54 @@ export const theme = {
   },
 };
 
+// ---------- seo settings ----------
+
+export interface SeoSettings {
+  title?: string;
+  description?: string;
+}
+
+export const seoSettings = {
+  get(): SeoSettings {
+    return getSetting('seo', {});
+  },
+  set(patch: SeoSettings): SeoSettings {
+    const next = { ...seoSettings.get() };
+    if (patch.title !== undefined) next.title = patch.title;
+    if (patch.description !== undefined) next.description = patch.description;
+    setSetting('seo', next);
+    return next;
+  },
+};
+
+// ---------- newsletter subscribers ----------
+
+export interface Subscriber {
+  id: number;
+  email: string;
+  source: string | null;
+  created_at: string;
+}
+
+export const subscribers = {
+  list(): Subscriber[] {
+    return db.prepare('SELECT * FROM subscribers ORDER BY created_at DESC').all() as unknown as Subscriber[];
+  },
+  /**
+   * Insert a new subscriber. A duplicate email hits the UNIQUE constraint — swallow that and
+   * return normally rather than throwing, so the public signup endpoint never reveals whether
+   * an address is already subscribed (privacy/enumeration concern).
+   */
+  create(email: string, source: string | null): void {
+    try {
+      db.prepare('INSERT INTO subscribers (email, source) VALUES (?, ?)').run(email, source);
+    } catch (err) {
+      if (err instanceof Error && /UNIQUE constraint failed/.test(err.message)) return;
+      throw err;
+    }
+  },
+};
+
 // ---------- page blocks ----------
 
 export type PageSlug = 'home' | 'bio' | 'music' | 'events' | 'contact' | 'links';
