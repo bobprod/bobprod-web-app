@@ -3,8 +3,14 @@ import { Helmet } from 'react-helmet-async';
 import { api } from '../lib/api';
 import type { Track } from '../lib/types';
 import { BlockList } from '../components/blocks/BlockList';
+import { usePublicConfig } from '../lib/publicConfig';
+import { useRevealAnimations } from '../lib/useRevealAnimations';
+
+const DEFAULT_DESCRIPTION = 'Latest releases and mixes from bobprod — house & techno DJ and producer.';
 
 export default function Music() {
+  const config = usePublicConfig();
+  const description = config.seo.description ?? DEFAULT_DESCRIPTION;
   const [tracks, setTracks] = useState<Track[] | null>(null);
   const [error, setError] = useState(false);
 
@@ -15,18 +21,26 @@ export default function Music() {
       .catch(() => setError(true));
   }, []);
 
+  useRevealAnimations([tracks]);
+
   return (
     <>
       <section className="mx-auto w-[min(760px,92vw)] py-24">
       <Helmet>
         <title>Music — bobprod</title>
+        <meta name="description" content={description} />
+        <meta property="og:title" content="Music — bobprod" />
+        <meta property="og:description" content={description} />
+        <meta property="og:type" content="website" />
+        <meta property="og:image" content="/favicon.svg" />
+        <meta name="twitter:card" content="summary" />
       </Helmet>
       <h1 className="font-display text-3xl text-white">Music</h1>
       <p className="mt-2 text-sm text-white/55">Latest releases and mixes.</p>
 
-      <div className="mt-8 flex flex-col gap-3">
+      <div className="reveal mt-8 flex flex-col gap-3">
         {error && (
-          <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-6 text-center text-sm text-white/55">
+          <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-6 text-center text-sm text-white/60">
             Couldn't load tracks right now. Try refreshing.
           </div>
         )}
@@ -38,7 +52,7 @@ export default function Music() {
           </>
         )}
         {tracks?.length === 0 && (
-          <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-6 text-center text-sm text-white/55">
+          <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-6 text-center text-sm text-white/60">
             No tracks yet — check back soon.
           </div>
         )}
@@ -52,7 +66,7 @@ export default function Music() {
             </div>
             <div className="min-w-0 flex-1">
               <p className="truncate text-sm font-semibold text-white">{track.title}</p>
-              <p className="truncate text-xs text-white/45">{track.artist}</p>
+              <p className="truncate text-xs text-white/60">{track.artist}</p>
             </div>
             <audio controls src={track.audio_url} className="h-9 max-w-[180px]" />
           </div>

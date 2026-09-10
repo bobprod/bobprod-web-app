@@ -9,6 +9,7 @@ const NAV = [
   { to: '/admin/blocks', label: 'Blocks' },
   { to: '/admin/theme', label: 'Branding' },
   { to: '/admin/assistant', label: 'Assistant' },
+  { to: '/admin/subscribers', label: 'Subscribers' },
 ];
 
 export default function AdminLayout() {

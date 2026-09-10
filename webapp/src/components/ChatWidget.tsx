@@ -72,7 +72,7 @@ export function ChatWidget() {
 
           <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-3">
             {messages.length === 0 && (
-              <p className="text-xs text-white/40">Ask about music, shows, or booking — I'll do my best to help.</p>
+              <p className="text-xs text-white/60">Ask about music, shows, or booking — I'll do my best to help.</p>
             )}
             <div className="flex flex-col gap-2">
               {messages.map((m, i) => (
@@ -89,7 +89,7 @@ export function ChatWidget() {
                   {m.content}
                 </div>
               ))}
-              {sending && <div className="text-xs text-white/40">Thinking…</div>}
+              {sending && <div className="text-xs text-white/60">Thinking…</div>}
             </div>
           </div>
 

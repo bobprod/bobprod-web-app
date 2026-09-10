@@ -1,12 +1,15 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { api } from '../lib/api';
+import { api, ApiError } from '../lib/api';
 import type { Biolink, EventItem, Track } from '../lib/types';
 import { BlockList } from '../components/blocks/BlockList';
 import { TrackPlayer } from '../components/TrackPlayer';
 import { usePublicConfig } from '../lib/publicConfig';
 import { categorizeBiolinkPlatform, CATEGORY_ORDER } from '../lib/biolinkCategory';
 import { formatEventDate } from '../lib/date';
+import { useRevealAnimations } from '../lib/useRevealAnimations';
+
+const DEFAULT_DESCRIPTION = "All of bobprod's official links — music, socials, and upcoming shows — in one place.";
 
 const PLATFORM_COLORS: Record<string, string> = {
   spotify: '#1ED760',
@@ -32,9 +35,12 @@ function nextUpcoming(events: EventItem[]): EventItem | undefined {
 
 export default function Links() {
   const config = usePublicConfig();
+  const description = config.seo.description ?? DEFAULT_DESCRIPTION;
   const [links, setLinks] = useState<Biolink[] | null>(null);
   const [error, setError] = useState(false);
   const [subscribed, setSubscribed] = useState(false);
+  const [subscribing, setSubscribing] = useState(false);
+  const [subscribeError, setSubscribeError] = useState<string | null>(null);
   const [featuredTrack, setFeaturedTrack] = useState<Track | null>(null);
   const [nextShow, setNextShow] = useState<EventItem | null>(null);
 
@@ -53,6 +59,23 @@ export default function Links() {
       .catch(() => {});
   }, []);
 
+  useRevealAnimations([links]);
+
+  async function handleSubscribe(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setSubscribeError(null);
+    setSubscribing(true);
+    const form = new FormData(e.currentTarget);
+    try {
+      await api.post('/api/newsletter', { email: form.get('email'), source: 'links' });
+      setSubscribed(true);
+    } catch (err) {
+      setSubscribeError(err instanceof ApiError ? err.message : 'Something went wrong. Please try again.');
+    } finally {
+      setSubscribing(false);
+    }
+  }
+
   const grouped = links
     ? CATEGORY_ORDER.map((category) => ({
         category,
@@ -65,6 +88,12 @@ export default function Links() {
       <section className="mx-auto flex w-[min(460px,92vw)] flex-col items-center px-2 py-16 text-center">
         <Helmet>
           <title>bobprod — Links</title>
+          <meta name="description" content={description} />
+          <meta property="og:title" content="bobprod — Links" />
+          <meta property="og:description" content={description} />
+          <meta property="og:type" content="website" />
+          <meta property="og:image" content="/favicon.svg" />
+          <meta name="twitter:card" content="summary" />
         </Helmet>
 
         <div className="mb-4 flex items-center gap-2">
@@ -109,7 +138,7 @@ export default function Links() {
                   <p className="truncate text-[13px] font-semibold text-white">
                     {nextShow.city ?? nextShow.venue}
                   </p>
-                  <p className="truncate text-[11px] text-white/45">{nextShow.venue}</p>
+                  <p className="truncate text-[11px] text-white/60">{nextShow.venue}</p>
                 </div>
                 {nextShow.ticket_url && (
                   <span className="flex-none rounded-full bg-linear-to-br from-[var(--accent-red)] to-[var(--accent-gold)] px-3 py-1.5 text-[11px] font-semibold text-white">
@@ -138,42 +167,41 @@ export default function Links() {
             Thanks — you're on the list.
           </div>
         ) : (
-          <form
-            className="mb-6 flex w-full gap-2"
-            onSubmit={(e) => {
-              e.preventDefault();
-              setSubscribed(true);
-            }}
-          >
-            <label htmlFor="email" className="sr-only">
-              Email address
-            </label>
-            <input
-              id="email"
-              type="email"
-              required
-              placeholder="Your email"
-              className="min-w-0 flex-1 rounded-xl border border-white/10 bg-white/5 px-3.5 py-3 text-xs text-white placeholder:text-white/40"
-            />
-            <button
-              type="submit"
-              className="flex-none rounded-xl bg-linear-to-br from-[var(--accent-red)] to-[var(--accent-gold)] px-4 py-3 text-xs font-semibold text-white hover:brightness-110"
-            >
-              Subscribe
-            </button>
+          <form className="mb-6 flex w-full flex-col gap-2" onSubmit={handleSubscribe}>
+            <div className="flex w-full gap-2">
+              <label htmlFor="email" className="sr-only">
+                Email address
+              </label>
+              <input
+                id="email"
+                name="email"
+                type="email"
+                required
+                placeholder="Your email"
+                className="min-w-0 flex-1 rounded-xl border border-white/10 bg-white/5 px-3.5 py-3 text-xs text-white placeholder:text-white/40"
+              />
+              <button
+                type="submit"
+                disabled={subscribing}
+                className="flex-none rounded-xl bg-linear-to-br from-[var(--accent-red)] to-[var(--accent-gold)] px-4 py-3 text-xs font-semibold text-white hover:brightness-110 disabled:opacity-60"
+              >
+                {subscribing ? 'Sending…' : 'Subscribe'}
+              </button>
+            </div>
+            {subscribeError && <p className="text-left text-xs text-red-400">{subscribeError}</p>}
           </form>
         )}
 
-        <div className="flex w-full flex-col gap-5">
-          {error && <p className="text-xs text-white/45">Couldn't load links right now.</p>}
+        <div className="reveal flex w-full flex-col gap-5">
+          {error && <p className="text-xs text-white/60">Couldn't load links right now.</p>}
           {!error &&
             links === null &&
             [0, 1, 2, 3].map((i) => <div key={i} className="h-14 animate-pulse rounded-[18px] bg-white/5" />)}
-          {links?.length === 0 && <p className="text-xs text-white/45">No links yet.</p>}
+          {links?.length === 0 && <p className="text-xs text-white/60">No links yet.</p>}
 
           {grouped.map(({ category, items }) => (
             <div key={category} className="flex flex-col gap-2.5 text-left">
-              <p className="px-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-white/35">
+              <p className="px-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-white/60">
                 {category}
               </p>
               {items.map((link) => (
@@ -192,7 +220,7 @@ export default function Links() {
                   </span>
                   <span className="min-w-0 flex-1 text-left">
                     <span className="block truncate text-[13px] font-semibold text-white">{link.label}</span>
-                    <span className="block truncate text-[11px] text-white/45">{link.platform}</span>
+                    <span className="block truncate text-[11px] text-white/60">{link.platform}</span>
                   </span>
                   <svg
                     width="14"
@@ -211,7 +239,7 @@ export default function Links() {
           ))}
         </div>
 
-        <p className="mt-8 text-[10.5px] text-white/30">&copy; {new Date().getFullYear()} bobprod</p>
+        <p className="mt-8 text-[10.5px] text-white/60">&copy; {new Date().getFullYear()} bobprod</p>
       </section>
 
       <BlockList page="links" />

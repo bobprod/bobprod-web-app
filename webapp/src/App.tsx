@@ -1,3 +1,4 @@
+import { Suspense, lazy } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
 import { PublicConfigProvider } from './lib/publicConfig';
@@ -13,15 +14,20 @@ import Contact from './pages/Contact';
 import Privacy from './pages/Privacy';
 import NotFound from './pages/NotFound';
 
-import AdminLogin from './pages/admin/AdminLogin';
-import AdminLayout from './pages/admin/AdminLayout';
-import AdminTracks from './pages/admin/AdminTracks';
-import AdminEvents from './pages/admin/AdminEvents';
-import AdminBookings from './pages/admin/AdminBookings';
-import AdminBiolinks from './pages/admin/AdminBiolinks';
-import AdminBlocks from './pages/admin/AdminBlocks';
-import AdminTheme from './pages/admin/AdminTheme';
-import AdminAssistant from './pages/admin/AdminAssistant';
+const AdminLogin = lazy(() => import('./pages/admin/AdminLogin'));
+const AdminLayout = lazy(() => import('./pages/admin/AdminLayout'));
+const AdminTracks = lazy(() => import('./pages/admin/AdminTracks'));
+const AdminEvents = lazy(() => import('./pages/admin/AdminEvents'));
+const AdminBookings = lazy(() => import('./pages/admin/AdminBookings'));
+const AdminBiolinks = lazy(() => import('./pages/admin/AdminBiolinks'));
+const AdminBlocks = lazy(() => import('./pages/admin/AdminBlocks'));
+const AdminTheme = lazy(() => import('./pages/admin/AdminTheme'));
+const AdminAssistant = lazy(() => import('./pages/admin/AdminAssistant'));
+const AdminSubscribers = lazy(() => import('./pages/admin/AdminSubscribers'));
+
+function AdminFallback() {
+  return <div className="min-h-screen bg-[#0a0a0a]" />;
+}
 
 function App() {
   return (
@@ -40,16 +46,94 @@ function App() {
                 <Route path="/privacy" element={<Privacy />} />
               </Route>
 
-              <Route path="/admin/login" element={<AdminLogin />} />
-              <Route path="/admin" element={<AdminLayout />}>
-                <Route index element={<AdminTracks />} />
-                <Route path="tracks" element={<AdminTracks />} />
-                <Route path="events" element={<AdminEvents />} />
-                <Route path="bookings" element={<AdminBookings />} />
-                <Route path="biolinks" element={<AdminBiolinks />} />
-                <Route path="blocks" element={<AdminBlocks />} />
-                <Route path="theme" element={<AdminTheme />} />
-                <Route path="assistant" element={<AdminAssistant />} />
+              <Route
+                path="/admin/login"
+                element={
+                  <Suspense fallback={<AdminFallback />}>
+                    <AdminLogin />
+                  </Suspense>
+                }
+              />
+              <Route
+                path="/admin"
+                element={
+                  <Suspense fallback={<AdminFallback />}>
+                    <AdminLayout />
+                  </Suspense>
+                }
+              >
+                <Route
+                  index
+                  element={
+                    <Suspense fallback={<AdminFallback />}>
+                      <AdminTracks />
+                    </Suspense>
+                  }
+                />
+                <Route
+                  path="tracks"
+                  element={
+                    <Suspense fallback={<AdminFallback />}>
+                      <AdminTracks />
+                    </Suspense>
+                  }
+                />
+                <Route
+                  path="events"
+                  element={
+                    <Suspense fallback={<AdminFallback />}>
+                      <AdminEvents />
+                    </Suspense>
+                  }
+                />
+                <Route
+                  path="bookings"
+                  element={
+                    <Suspense fallback={<AdminFallback />}>
+                      <AdminBookings />
+                    </Suspense>
+                  }
+                />
+                <Route
+                  path="biolinks"
+                  element={
+                    <Suspense fallback={<AdminFallback />}>
+                      <AdminBiolinks />
+                    </Suspense>
+                  }
+                />
+                <Route
+                  path="blocks"
+                  element={
+                    <Suspense fallback={<AdminFallback />}>
+                      <AdminBlocks />
+                    </Suspense>
+                  }
+                />
+                <Route
+                  path="theme"
+                  element={
+                    <Suspense fallback={<AdminFallback />}>
+                      <AdminTheme />
+                    </Suspense>
+                  }
+                />
+                <Route
+                  path="assistant"
+                  element={
+                    <Suspense fallback={<AdminFallback />}>
+                      <AdminAssistant />
+                    </Suspense>
+                  }
+                />
+                <Route
+                  path="subscribers"
+                  element={
+                    <Suspense fallback={<AdminFallback />}>
+                      <AdminSubscribers />
+                    </Suspense>
+                  }
+                />
               </Route>
 
               <Route path="*" element={<NotFound />} />

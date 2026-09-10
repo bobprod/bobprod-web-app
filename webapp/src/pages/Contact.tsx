@@ -2,10 +2,14 @@ import { useState, type FormEvent } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { api, ApiError } from '../lib/api';
 import { BlockList } from '../components/blocks/BlockList';
+import { usePublicConfig } from '../lib/publicConfig';
 
 const EVENT_TYPES = ['Club Night', 'Private Event', 'Festival'];
+const DEFAULT_DESCRIPTION = "Book bobprod for your club night, private event, or festival.";
 
 export default function Contact() {
+  const config = usePublicConfig();
+  const description = config.seo.description ?? DEFAULT_DESCRIPTION;
   const [eventType, setEventType] = useState(EVENT_TYPES[0]);
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -48,6 +52,12 @@ export default function Contact() {
     <section className="mx-auto w-[min(560px,92vw)] py-24">
       <Helmet>
         <title>Booking — bobprod</title>
+        <meta name="description" content={description} />
+        <meta property="og:title" content="Booking — bobprod" />
+        <meta property="og:description" content={description} />
+        <meta property="og:type" content="website" />
+        <meta property="og:image" content="/favicon.svg" />
+        <meta name="twitter:card" content="summary" />
       </Helmet>
       <h1 className="font-display text-3xl text-white">Book bobprod</h1>
       <p className="mt-2 text-sm text-white/55">Tell us about your event and we'll follow up.</p>

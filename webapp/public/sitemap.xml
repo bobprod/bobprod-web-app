@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- bobprod.example is a placeholder domain — replace every <loc> below with the real
+     production domain at deploy time (see also src/lib/seo.ts and robots.txt). -->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://bobprod.example/</loc></url>
+  <url><loc>https://bobprod.example/music</loc></url>
+  <url><loc>https://bobprod.example/bio</loc></url>
+  <url><loc>https://bobprod.example/events</loc></url>
+  <url><loc>https://bobprod.example/links</loc></url>
+  <url><loc>https://bobprod.example/contact</loc></url>
+  <url><loc>https://bobprod.example/privacy</loc></url>
+</urlset>
