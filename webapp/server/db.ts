@@ -100,6 +100,13 @@ db.exec(`
     config TEXT NOT NULL DEFAULT '{}'
   );
   CREATE INDEX IF NOT EXISTS idx_page_blocks_page ON page_blocks (page, sort_order);
+
+  CREATE TABLE IF NOT EXISTS subscribers (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    email TEXT NOT NULL UNIQUE,
+    source TEXT,
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+  );
 `);
 
 // Seed the single admin account from env on first boot.

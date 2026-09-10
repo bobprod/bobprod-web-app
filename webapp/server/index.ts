@@ -1,5 +1,7 @@
 import express from 'express';
+import type { Request, Response, NextFunction } from 'express';
 import cookieParser from 'cookie-parser';
+import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import multer from 'multer';
 import path from 'node:path';
@@ -12,6 +14,8 @@ import {
   bookings,
   biolinks,
   theme,
+  seoSettings,
+  subscribers,
   pageBlocks,
   PAGE_SLUGS,
   BLOCK_TYPES,
@@ -20,6 +24,7 @@ import {
   type BlockType,
 } from './repositories.ts';
 import { getSetting } from './db.ts';
+import { isNonEmptyString, isSafeUrl } from './validation.ts';
 import {
   providers,
   getOrCreateConversation,
@@ -34,6 +39,10 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const UPLOADS_DIR = path.join(__dirname, 'uploads');
 
 const app = express();
+// CSP is explicitly disabled for now: the content-blocks feature embeds youtube/soundcloud
+// iframes and a real CSP needs careful allowlist tuning that's out of scope for this pass.
+// The rest of helmet's defaults (nosniff, frameguard, HSTS, hide-powered-by, referrer-policy) are safe to enable as-is.
+app.use(helmet({ contentSecurityPolicy: false }));
 app.use(express.json());
 app.use(cookieParser());
 app.use('/uploads', express.static(UPLOADS_DIR));
@@ -48,12 +57,54 @@ const uploadStorage = multer.diskStorage({
     cb(null, `${crypto.randomUUID()}${ext}`);
   },
 });
-const upload = multer({ storage: uploadStorage, limits: { fileSize: 25 * 1024 * 1024 } });
+// Restricts uploads to the track-audio and cover/avatar-image types the site actually serves.
+// Without this, express.static('/uploads') would serve back an uploaded .html/.svg with a
+// sniffed content-type — a same-origin stored-XSS vector.
+const ALLOWED_UPLOAD_MIME_TYPES = new Set([
+  'audio/mpeg',
+  'audio/wav',
+  'audio/ogg',
+  'image/png',
+  'image/jpeg',
+  'image/webp',
+  'image/gif',
+]);
+const upload = multer({
+  storage: uploadStorage,
+  limits: { fileSize: 25 * 1024 * 1024 },
+  fileFilter: (_req, file, cb) => {
+    if (ALLOWED_UPLOAD_MIME_TYPES.has(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error('Unsupported file type'));
+    }
+  },
+});
+// multer's fileFilter/limit errors are passed to next(err) inside the upload middleware itself,
+// which would otherwise fall through to the generic 500 error handler — wrap the route's upload
+// step so a rejected file type comes back as a clean 400 instead.
+function handleUpload(req: Request, res: Response, next: NextFunction) {
+  upload.single('file')(req, res, (err: unknown) => {
+    if (err) {
+      res.status(400).json({ error: err instanceof Error ? err.message : 'Upload failed' });
+      return;
+    }
+    next();
+  });
+}
 
 const loginLimiter = rateLimit({ windowMs: 15 * 60 * 1000, limit: 10, standardHeaders: true, legacyHeaders: false });
 const bookingLimiter = rateLimit({ windowMs: 60 * 60 * 1000, limit: 5, standardHeaders: true, legacyHeaders: false });
 // Guards the BYOK provider key from cost-abuse via the public chat endpoint.
 const chatLimiter = rateLimit({ windowMs: 60 * 1000, limit: 10, standardHeaders: true, legacyHeaders: false });
+// Disk-exhaustion guard — no reason to allow unlimited uploads even from an authenticated admin.
+const uploadLimiter = rateLimit({ windowMs: 60 * 60 * 1000, limit: 30, standardHeaders: true, legacyHeaders: false });
+// Each call makes a real outbound request to a configured LLM provider (costs real API quota/money).
+const providerTestLimiter = rateLimit({ windowMs: 60 * 60 * 1000, limit: 20, standardHeaders: true, legacyHeaders: false });
+// Public signup form — keep it generous enough for real visitors but block scripted abuse.
+const newsletterLimiter = rateLimit({ windowMs: 60 * 60 * 1000, limit: 5, standardHeaders: true, legacyHeaders: false });
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const VALID_PROVIDER_TYPES: ProviderType[] = ['openrouter', 'openai', 'anthropic', 'custom'];
 
@@ -88,9 +139,27 @@ app.get('/api/admin/tracks', requireAdmin, (_req, res) => {
   res.json(tracks.list());
 });
 app.post('/api/admin/tracks', requireAdmin, (req, res) => {
+  const { title, artist } = req.body ?? {};
+  if (!isNonEmptyString(title)) {
+    res.status(400).json({ error: 'title is required' });
+    return;
+  }
+  if (!isNonEmptyString(artist)) {
+    res.status(400).json({ error: 'artist is required' });
+    return;
+  }
   res.status(201).json(tracks.create(req.body));
 });
 app.put('/api/admin/tracks/:id', requireAdmin, (req, res) => {
+  const { title, artist } = req.body ?? {};
+  if (title !== undefined && !isNonEmptyString(title)) {
+    res.status(400).json({ error: 'title must be a non-empty string' });
+    return;
+  }
+  if (artist !== undefined && !isNonEmptyString(artist)) {
+    res.status(400).json({ error: 'artist must be a non-empty string' });
+    return;
+  }
   const updated = tracks.update(Number(req.params.id), req.body);
   if (!updated) {
     res.status(404).json({ error: 'Track not found' });
@@ -109,9 +178,28 @@ app.get('/api/admin/events', requireAdmin, (_req, res) => {
   res.json(events.list());
 });
 app.post('/api/admin/events', requireAdmin, (req, res) => {
+  const { venue, ticket_url } = req.body ?? {};
+  if (!isNonEmptyString(venue)) {
+    res.status(400).json({ error: 'venue is required' });
+    return;
+  }
+  // ticket_url is optional — only validate it when a non-empty value is actually provided.
+  if (ticket_url !== undefined && ticket_url !== null && ticket_url !== '' && !isSafeUrl(ticket_url)) {
+    res.status(400).json({ error: 'ticket_url must be a valid http(s) or mailto URL' });
+    return;
+  }
   res.status(201).json(events.create(req.body));
 });
 app.put('/api/admin/events/:id', requireAdmin, (req, res) => {
+  const { venue, ticket_url } = req.body ?? {};
+  if (venue !== undefined && !isNonEmptyString(venue)) {
+    res.status(400).json({ error: 'venue must be a non-empty string' });
+    return;
+  }
+  if (ticket_url !== undefined && ticket_url !== null && ticket_url !== '' && !isSafeUrl(ticket_url)) {
+    res.status(400).json({ error: 'ticket_url must be a valid http(s) or mailto URL' });
+    return;
+  }
   const updated = events.update(Number(req.params.id), req.body);
   if (!updated) {
     res.status(404).json({ error: 'Event not found' });
@@ -149,9 +237,35 @@ app.get('/api/admin/biolinks', requireAdmin, (_req, res) => {
   res.json(biolinks.list());
 });
 app.post('/api/admin/biolinks', requireAdmin, (req, res) => {
+  const { platform, label, url } = req.body ?? {};
+  if (!isNonEmptyString(platform)) {
+    res.status(400).json({ error: 'platform is required' });
+    return;
+  }
+  if (!isNonEmptyString(label)) {
+    res.status(400).json({ error: 'label is required' });
+    return;
+  }
+  if (!isSafeUrl(url)) {
+    res.status(400).json({ error: 'url must be a valid http(s) or mailto URL' });
+    return;
+  }
   res.status(201).json(biolinks.create(req.body));
 });
 app.put('/api/admin/biolinks/:id', requireAdmin, (req, res) => {
+  const { platform, label, url } = req.body ?? {};
+  if (platform !== undefined && !isNonEmptyString(platform)) {
+    res.status(400).json({ error: 'platform must be a non-empty string' });
+    return;
+  }
+  if (label !== undefined && !isNonEmptyString(label)) {
+    res.status(400).json({ error: 'label must be a non-empty string' });
+    return;
+  }
+  if (url !== undefined && !isSafeUrl(url)) {
+    res.status(400).json({ error: 'url must be a valid http(s) or mailto URL' });
+    return;
+  }
   const updated = biolinks.update(Number(req.params.id), req.body);
   if (!updated) {
     res.status(404).json({ error: 'Link not found' });
@@ -237,7 +351,7 @@ app.put('/api/admin/assistant/providers/:id/default', requireAdmin, (req, res) =
   }
 });
 
-app.post('/api/admin/assistant/providers/:id/test', requireAdmin, async (req, res) => {
+app.post('/api/admin/assistant/providers/:id/test', requireAdmin, providerTestLimiter, async (req, res) => {
   const provider = providers.getDecrypted(Number(req.params.id));
   if (!provider) {
     res.status(404).json({ error: 'Provider not found' });
@@ -274,6 +388,21 @@ app.put('/api/admin/settings/chatbot', requireAdmin, (req, res) => {
 
 app.get('/api/admin/settings/chatbot', requireAdmin, (_req, res) => {
   res.json(chatbotSettings.get());
+});
+
+// ---------- admin: seo settings ----------
+
+app.put('/api/admin/settings/seo', requireAdmin, (req, res) => {
+  const { title, description } = req.body ?? {};
+  if (title !== undefined && typeof title !== 'string') {
+    res.status(400).json({ error: 'title must be a string' });
+    return;
+  }
+  if (description !== undefined && typeof description !== 'string') {
+    res.status(400).json({ error: 'description must be a string' });
+    return;
+  }
+  res.json(seoSettings.set({ title, description }));
 });
 
 // ---------- admin: theme ----------
@@ -360,12 +489,18 @@ app.delete('/api/admin/blocks/:id', requireAdmin, (req, res) => {
 
 // ---------- admin: uploads ----------
 
-app.post('/api/admin/uploads', requireAdmin, upload.single('file'), (req, res) => {
+app.post('/api/admin/uploads', requireAdmin, uploadLimiter, handleUpload, (req, res) => {
   if (!req.file) {
     res.status(400).json({ error: 'No file uploaded' });
     return;
   }
   res.status(201).json({ url: `/uploads/${req.file.filename}` });
+});
+
+// ---------- admin: newsletter subscribers ----------
+
+app.get('/api/admin/subscribers', requireAdmin, (_req, res) => {
+  res.json(subscribers.list());
 });
 
 // ---------- public reads ----------
@@ -415,6 +550,20 @@ app.post('/api/bookings', bookingLimiter, (req, res) => {
   res.status(201).json(created);
 });
 
+// ---------- public: newsletter signup ----------
+
+app.post('/api/newsletter', newsletterLimiter, (req, res) => {
+  const { email, source } = req.body ?? {};
+  if (typeof email !== 'string' || !EMAIL_RE.test(email.trim())) {
+    res.status(400).json({ error: 'A valid email is required' });
+    return;
+  }
+  subscribers.create(email.trim(), typeof source === 'string' && source.trim() ? source.trim() : null);
+  // Always looks like success to the caller, including the duplicate-email case — don't leak
+  // whether an address is already subscribed.
+  res.status(201).json({ ok: true });
+});
+
 // ---------- public: chat ----------
 
 app.post('/api/chat', chatLimiter, async (req, res) => {
@@ -451,6 +600,16 @@ app.post('/api/chat', chatLimiter, async (req, res) => {
 
 app.use('/api', (_req, res) => {
   res.status(404).json({ error: 'Not found' });
+});
+
+// ---------- global error handler ----------
+// Must be registered last. Express 5 auto-forwards both synchronous throws and rejected
+// promises from route handlers here (4-arg signature), so any unvalidated-type crash (e.g. a
+// wrong-type value hitting node:sqlite's parameter binding) returns a clean generic message
+// instead of leaking a stack trace, regardless of NODE_ENV.
+app.use((err: unknown, _req: Request, res: Response, _next: NextFunction) => {
+  console.error(err);
+  res.status(500).json({ error: 'Internal server error' });
 });
 
 const PORT = Number(process.env.PORT ?? 3001);
