@@ -17,7 +17,7 @@ export function PressQuotesBlock({ config }: { config: PressQuotesConfig }) {
             )}
             <div className="min-w-0">
               <p className="truncate text-sm italic text-white/80">&ldquo;{item.quote}&rdquo;</p>
-              <p className="mt-1 text-xs uppercase tracking-wide text-white/45">{item.outlet}</p>
+              <p className="mt-1 text-xs uppercase tracking-wide text-white/60">{item.outlet}</p>
             </div>
           </div>
         ))}

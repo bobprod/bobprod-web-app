@@ -27,6 +27,13 @@ export interface Booking {
   created_at: string;
 }
 
+export interface Subscriber {
+  id: number;
+  email: string;
+  source: string | null;
+  created_at: string;
+}
+
 export interface Biolink {
   id: number;
   platform: string;

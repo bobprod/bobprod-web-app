@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { api } from '../../lib/api';
-import type { Theme } from '../../lib/types';
+import type { PublicConfig, Theme } from '../../lib/types';
 
 const DEFAULT_THEME: Theme = { accentRed: '#d1382a', accentGold: '#f0a91f', bgColor: '#0a0a0a' };
 const inputCls = 'w-full rounded-lg border border-white/10 bg-white/5 px-2.5 py-1.5 text-sm text-white';
@@ -14,17 +14,37 @@ export default function AdminTheme() {
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
 
+  const [seoTitle, setSeoTitle] = useState('');
+  const [seoDescription, setSeoDescription] = useState('');
+  const [seoSaving, setSeoSaving] = useState(false);
+  const [seoSaved, setSeoSaved] = useState(false);
+
   useEffect(() => {
     api
       .get<Theme>('/api/admin/theme')
       .then((t) => setTheme({ ...DEFAULT_THEME, ...t }))
       .finally(() => setLoaded(true));
+    api.get<PublicConfig>('/api/public-config').then((config) => {
+      setSeoTitle(config.seo.title ?? '');
+      setSeoDescription(config.seo.description ?? '');
+    });
   }, []);
 
   async function save() {
     setSaved(false);
     await api.put('/api/admin/theme', theme);
     setSaved(true);
+  }
+
+  async function saveSeo() {
+    setSeoSaved(false);
+    setSeoSaving(true);
+    try {
+      await api.put('/api/admin/settings/seo', { title: seoTitle, description: seoDescription });
+      setSeoSaved(true);
+    } finally {
+      setSeoSaving(false);
+    }
   }
 
   async function handleAvatarUpload(file: File | undefined, input: HTMLInputElement) {
@@ -122,6 +142,54 @@ export default function AdminTheme() {
         Save
       </button>
       {saved && <span className="ml-3 text-xs text-green-400">Saved</span>}
+
+      <h2 className="font-display mt-10 mb-1 text-xl text-white">SEO</h2>
+      <p className="mb-4 text-sm text-white/50">
+        Default title and description used across the public site when a page doesn't set its own.
+      </p>
+
+      <div className="mb-4">
+        <label htmlFor="seo-title" className="mb-1 block text-sm text-white/70">
+          Title
+        </label>
+        <input
+          id="seo-title"
+          value={seoTitle}
+          onChange={(e) => {
+            setSeoSaved(false);
+            setSeoTitle(e.target.value);
+          }}
+          placeholder="bobprod — House & Techno DJ / Producer"
+          className={inputCls}
+        />
+      </div>
+
+      <div className="mb-6">
+        <label htmlFor="seo-description" className="mb-1 block text-sm text-white/70">
+          Description
+        </label>
+        <textarea
+          id="seo-description"
+          value={seoDescription}
+          onChange={(e) => {
+            setSeoSaved(false);
+            setSeoDescription(e.target.value);
+          }}
+          placeholder="bobprod — house & techno DJ and producer. New EP out now."
+          rows={3}
+          className={inputCls}
+        />
+      </div>
+
+      <button
+        type="button"
+        onClick={saveSeo}
+        disabled={seoSaving}
+        className="rounded-lg bg-linear-to-br from-[var(--accent-red)] to-[var(--accent-gold)] px-5 py-2.5 text-sm font-semibold text-white disabled:opacity-60"
+      >
+        {seoSaving ? 'Saving…' : 'Save'}
+      </button>
+      {seoSaved && <span className="ml-3 text-xs text-green-400">Saved</span>}
     </div>
   );
 }

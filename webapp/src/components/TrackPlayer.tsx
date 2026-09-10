@@ -56,7 +56,7 @@ export function TrackPlayer({ track }: { track: Track }) {
             Now Playing
           </p>
           <p className="truncate text-[13px] font-semibold text-white">{track.title}</p>
-          <p className="truncate text-[11px] text-white/45">{track.artist}</p>
+          <p className="truncate text-[11px] text-white/60">{track.artist}</p>
         </div>
         <button
           type="button"
@@ -77,14 +77,14 @@ export function TrackPlayer({ track }: { track: Track }) {
         </button>
       </div>
       <div className="mt-3 flex items-center gap-2">
-        <span className="w-8 flex-none text-[10px] text-white/40">{formatTime(current)}</span>
+        <span className="w-8 flex-none text-[10px] text-white/60">{formatTime(current)}</span>
         <div className="h-1 flex-1 overflow-hidden rounded-full bg-white/10">
           <div
             className="h-full rounded-full bg-linear-to-r from-[var(--accent-red)] to-[var(--accent-gold)]"
             style={{ width: `${progress}%` }}
           />
         </div>
-        <span className="w-8 flex-none text-right text-[10px] text-white/40">{formatTime(duration)}</span>
+        <span className="w-8 flex-none text-right text-[10px] text-white/60">{formatTime(duration)}</span>
       </div>
     </div>
   );

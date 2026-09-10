@@ -13,7 +13,7 @@ export function TestimonialsBlock({ config }: { config: TestimonialsConfig }) {
             className="rounded-2xl border border-white/10 bg-white/[0.045] p-6 backdrop-blur-md"
           >
             <p className="text-sm italic text-white/80">&ldquo;{q.text}&rdquo;</p>
-            <footer className="mt-3 text-xs text-white/45">— {q.attribution}</footer>
+            <footer className="mt-3 text-xs text-white/60">— {q.attribution}</footer>
           </blockquote>
         ))}
       </div>

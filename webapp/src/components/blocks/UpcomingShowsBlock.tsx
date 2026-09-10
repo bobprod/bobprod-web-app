@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
+import { Helmet } from 'react-helmet-async';
 import { api } from '../../lib/api';
 import type { EventItem, UpcomingShowsConfig } from '../../lib/types';
 import { formatEventDate } from '../../lib/date';
+import { musicEventJsonLd } from '../../lib/seo';
 
 export function UpcomingShowsBlock({ config }: { config: UpcomingShowsConfig }) {
   const [events, setEvents] = useState<EventItem[] | null>(null);
@@ -19,6 +21,11 @@ export function UpcomingShowsBlock({ config }: { config: UpcomingShowsConfig }) 
 
   return (
     <section className="mx-auto w-[min(900px,92vw)] py-16">
+      {shown.map((event) => (
+        <Helmet key={event.id} encodeSpecialCharacters={false}>
+          <script type="application/ld+json">{JSON.stringify(musicEventJsonLd(event))}</script>
+        </Helmet>
+      ))}
       <h2 className="font-display mb-6 text-2xl text-white">Upcoming Shows</h2>
       <div className="grid gap-4 sm:grid-cols-2">
         {shown.map((event) => {
@@ -34,7 +41,7 @@ export function UpcomingShowsBlock({ config }: { config: UpcomingShowsConfig }) 
               </div>
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-semibold text-white">{event.city ?? 'TBA'}</p>
-                <p className="truncate text-xs text-white/45">{event.venue}</p>
+                <p className="truncate text-xs text-white/60">{event.venue}</p>
               </div>
             </div>
           );
