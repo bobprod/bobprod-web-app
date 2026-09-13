@@ -2,15 +2,26 @@ import { useState, type FormEvent } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { api, ApiError } from '../lib/api';
 import { BlockList } from '../components/blocks/BlockList';
+import { BookingCalendar } from '../components/BookingCalendar';
 import { usePublicConfig } from '../lib/publicConfig';
+import { useConsent } from '../lib/consent';
 
 const EVENT_TYPES = ['Club Night', 'Private Event', 'Festival'];
 const DEFAULT_DESCRIPTION = "Book bobprod for your club night, private event, or festival.";
 
+function toIsoDate(d: Date) {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;
+}
+
 export default function Contact() {
   const config = usePublicConfig();
+  const { consent } = useConsent();
   const description = config.seo.description ?? DEFAULT_DESCRIPTION;
   const [eventType, setEventType] = useState(EVENT_TYPES[0]);
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -25,8 +36,10 @@ export default function Contact() {
         name: form.get('name'),
         email: form.get('email'),
         event_type: eventType,
-        requested_date: form.get('date') || null,
+        requested_date: selectedDate ? toIsoDate(selectedDate) : null,
+        venue: form.get('venue') || null,
         message: form.get('message') || null,
+        marketingConsent: consent?.marketing ?? false,
       });
       setSubmitted(true);
     } catch (err) {
@@ -106,15 +119,18 @@ export default function Contact() {
           </div>
         </div>
         <div>
-          <label htmlFor="date" className="mb-1 block text-xs text-white/55">
-            Preferred date
+          <label htmlFor="venue" className="mb-1 block text-xs text-white/55">
+            Venue / city
           </label>
           <input
-            id="date"
-            name="date"
-            type="date"
+            id="venue"
+            name="venue"
             className="w-full rounded-xl border border-white/10 bg-white/5 px-3.5 py-3 text-sm text-white"
           />
+        </div>
+        <div>
+          <p className="mb-1 block text-xs text-white/55">Preferred date</p>
+          <BookingCalendar value={selectedDate} onChange={setSelectedDate} />
         </div>
         <div>
           <label htmlFor="message" className="mb-1 block text-xs text-white/55">

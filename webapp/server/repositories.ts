@@ -25,6 +25,7 @@ export interface Booking {
   email: string;
   event_type: string | null;
   requested_date: string | null;
+  venue: string | null;
   message: string | null;
   status: 'pending' | 'confirmed' | 'declined';
   created_at: string;
@@ -117,9 +118,9 @@ export const bookings = {
   create(data: Omit<Booking, 'id' | 'status' | 'created_at'>): Booking {
     const info = db
       .prepare(
-        'INSERT INTO bookings (name, email, event_type, requested_date, message, status) VALUES (?, ?, ?, ?, ?, ?)',
+        'INSERT INTO bookings (name, email, event_type, requested_date, venue, message, status) VALUES (?, ?, ?, ?, ?, ?, ?)',
       )
-      .run(data.name, data.email, data.event_type, data.requested_date, data.message, 'pending');
+      .run(data.name, data.email, data.event_type, data.requested_date, data.venue, data.message, 'pending');
     return db.prepare('SELECT * FROM bookings WHERE id = ?').get(info.lastInsertRowid) as unknown as Booking;
   },
   setStatus(id: number, status: Booking['status']): Booking | undefined {
@@ -366,5 +367,37 @@ export const pageBlocks = {
 
   remove(id: number) {
     db.prepare('DELETE FROM page_blocks WHERE id = ?').run(id);
+  },
+};
+
+// ---------- conversion events (marketing audit log) ----------
+
+export interface ConversionEvent {
+  id: number;
+  event_type: string;
+  channel: 'facebook_capi' | 'tiktok_events';
+  payload_json: string;
+  status: 'sent' | 'failed';
+  sent_at: string;
+  booking_id: number | null;
+}
+
+export const conversionEvents = {
+  list(limit: number, offset: number): ConversionEvent[] {
+    return db
+      .prepare('SELECT * FROM conversion_events ORDER BY sent_at DESC LIMIT ? OFFSET ?')
+      .all(limit, offset) as unknown as ConversionEvent[];
+  },
+  count(): number {
+    const row = db.prepare('SELECT COUNT(*) as c FROM conversion_events').get() as { c: number };
+    return row.c;
+  },
+  record(entry: Omit<ConversionEvent, 'id' | 'sent_at'>): ConversionEvent {
+    const info = db
+      .prepare(
+        'INSERT INTO conversion_events (event_type, channel, payload_json, status, booking_id) VALUES (?, ?, ?, ?, ?)',
+      )
+      .run(entry.event_type, entry.channel, entry.payload_json, entry.status, entry.booking_id);
+    return db.prepare('SELECT * FROM conversion_events WHERE id = ?').get(info.lastInsertRowid) as unknown as ConversionEvent;
   },
 };

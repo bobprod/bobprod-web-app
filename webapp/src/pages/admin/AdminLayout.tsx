@@ -10,6 +10,7 @@ const NAV = [
   { to: '/admin/theme', label: 'Branding' },
   { to: '/admin/assistant', label: 'Assistant' },
   { to: '/admin/subscribers', label: 'Subscribers' },
+  { to: '/admin/marketing', label: 'Marketing' },
 ];
 
 export default function AdminLayout() {

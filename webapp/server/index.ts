@@ -26,6 +26,14 @@ import {
 import { getSetting } from './db.ts';
 import { isNonEmptyString, isSafeUrl } from './validation.ts';
 import {
+  getAdminConfig,
+  setAdminConfig,
+  getPublicConfig as getPublicTrackingConfig,
+  fireBookingConversionEvents,
+  listConversionEvents,
+  type AdminTrackingConfig,
+} from './marketingRepository.ts';
+import {
   providers,
   getOrCreateConversation,
   appendMessage,
@@ -414,6 +422,51 @@ app.put('/api/admin/theme', requireAdmin, (req, res) => {
   res.json(theme.set(req.body));
 });
 
+// ---------- admin: marketing / tracking ----------
+
+app.get('/api/admin/marketing', requireAdmin, (_req, res) => {
+  res.json(getAdminConfig());
+});
+
+app.put('/api/admin/marketing', requireAdmin, (req, res) => {
+  res.json(setAdminConfig(req.body as AdminTrackingConfig));
+});
+
+app.get('/api/admin/marketing/events', requireAdmin, (req, res) => {
+  const page = Math.max(1, Number(req.query.page) || 1);
+  const pageSize = Math.min(100, Math.max(1, Number(req.query.pageSize) || 20));
+  res.json(listConversionEvents(page, pageSize));
+});
+
+app.post('/api/admin/marketing/seo-suggest', requireAdmin, async (req, res) => {
+  const { route } = req.body ?? {};
+  if (typeof route !== 'string' || !route.trim()) {
+    res.status(400).json({ error: 'route is required' });
+    return;
+  }
+  const defaultProvider = providers.getDefaultActive();
+  if (!defaultProvider) {
+    res.status(409).json({ error: 'No default Assistant provider is configured' });
+    return;
+  }
+  try {
+    const client = resolveLLMClient(defaultProvider.providerType, defaultProvider.apiKey);
+    const prompt =
+      `Write a concise SEO title (under 60 characters) and meta description (under 155 characters) ` +
+      `for the "${route}" page of bobprod, a house & techno DJ/producer's website. ` +
+      `Respond with exactly two lines: "Title: ..." then "Description: ...". No other text.`;
+    const result = await client.send([{ role: 'user', content: prompt }], defaultProvider.modelId);
+    const titleMatch = result.reply.match(/Title:\s*(.+)/i);
+    const descMatch = result.reply.match(/Description:\s*(.+)/i);
+    res.json({
+      title: titleMatch?.[1]?.trim() ?? '',
+      description: descMatch?.[1]?.trim() ?? '',
+    });
+  } catch (err) {
+    res.status(500).json({ error: err instanceof Error ? err.message : 'SEO suggestion failed' });
+  }
+});
+
 // ---------- admin: page blocks ----------
 
 app.get('/api/admin/blocks', requireAdmin, (req, res) => {
@@ -526,7 +579,7 @@ app.get('/api/public/blocks', (req, res) => {
 app.get('/api/public-config', (_req, res) => {
   res.json({
     seo: getSetting('seo', {}),
-    tracking: getSetting('tracking', {}),
+    tracking: getPublicTrackingConfig(),
     chatbotEnabled: getSetting('chatbotEnabled', false),
     theme: theme.get(),
   });
@@ -535,7 +588,7 @@ app.get('/api/public-config', (_req, res) => {
 // ---------- public: booking request ----------
 
 app.post('/api/bookings', bookingLimiter, (req, res) => {
-  const { name, email, event_type, requested_date, message } = req.body ?? {};
+  const { name, email, event_type, requested_date, venue, message, marketingConsent } = req.body ?? {};
   if (typeof name !== 'string' || !name.trim() || typeof email !== 'string' || !email.trim()) {
     res.status(400).json({ error: 'Name and email are required' });
     return;
@@ -545,9 +598,15 @@ app.post('/api/bookings', bookingLimiter, (req, res) => {
     email: email.trim(),
     event_type: event_type ?? null,
     requested_date: requested_date ?? null,
+    venue: venue ?? null,
     message: message ?? null,
   });
   res.status(201).json(created);
+
+  // Fire-and-forget: conversion sends must never delay or fail the visitor-facing response above.
+  fireBookingConversionEvents(created.id, Boolean(marketingConsent)).catch((err) => {
+    console.error('Conversion event dispatch failed:', err instanceof Error ? err.message : err);
+  });
 });
 
 // ---------- public: newsletter signup ----------

@@ -4,7 +4,7 @@ import type { PublicConfig } from './types';
 
 const DEFAULT_CONFIG: PublicConfig = {
   seo: {},
-  tracking: {},
+  tracking: { consentPolicy: { necessary: true, analytics: false, marketing: false } },
   chatbotEnabled: false,
   theme: { accentRed: '#d1382a', accentGold: '#f0a91f', bgColor: '#0a0a0a' },
 };

@@ -2,6 +2,7 @@ import { Suspense, lazy } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { HelmetProvider } from 'react-helmet-async';
 import { PublicConfigProvider } from './lib/publicConfig';
+import { ConsentProvider } from './lib/consent';
 import { AdminAuthProvider } from './components/AdminAuthProvider';
 import { Layout } from './components/Layout';
 
@@ -12,6 +13,8 @@ import Events from './pages/Events';
 import Links from './pages/Links';
 import Contact from './pages/Contact';
 import Privacy from './pages/Privacy';
+import Terms from './pages/Terms';
+import LegalNotice from './pages/LegalNotice';
 import NotFound from './pages/NotFound';
 
 const AdminLogin = lazy(() => import('./pages/admin/AdminLogin'));
@@ -24,6 +27,7 @@ const AdminBlocks = lazy(() => import('./pages/admin/AdminBlocks'));
 const AdminTheme = lazy(() => import('./pages/admin/AdminTheme'));
 const AdminAssistant = lazy(() => import('./pages/admin/AdminAssistant'));
 const AdminSubscribers = lazy(() => import('./pages/admin/AdminSubscribers'));
+const AdminMarketing = lazy(() => import('./pages/admin/AdminMarketing'));
 
 function AdminFallback() {
   return <div className="min-h-screen bg-[#0a0a0a]" />;
@@ -33,6 +37,7 @@ function App() {
   return (
     <HelmetProvider>
       <PublicConfigProvider>
+        <ConsentProvider>
         <AdminAuthProvider>
           <BrowserRouter>
             <Routes>
@@ -44,6 +49,8 @@ function App() {
                 <Route path="/links" element={<Links />} />
                 <Route path="/contact" element={<Contact />} />
                 <Route path="/privacy" element={<Privacy />} />
+                <Route path="/terms" element={<Terms />} />
+                <Route path="/legal" element={<LegalNotice />} />
               </Route>
 
               <Route
@@ -134,12 +141,21 @@ function App() {
                     </Suspense>
                   }
                 />
+                <Route
+                  path="marketing"
+                  element={
+                    <Suspense fallback={<AdminFallback />}>
+                      <AdminMarketing />
+                    </Suspense>
+                  }
+                />
               </Route>
 
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
         </AdminAuthProvider>
+        </ConsentProvider>
       </PublicConfigProvider>
     </HelmetProvider>
   );
