@@ -22,6 +22,7 @@ export interface Booking {
   email: string;
   event_type: string | null;
   requested_date: string | null;
+  venue: string | null;
   message: string | null;
   status: 'pending' | 'confirmed' | 'declined';
   created_at: string;
@@ -50,9 +51,39 @@ export interface Theme {
   avatarUrl?: string;
 }
 
+export interface ConsentPolicy {
+  necessary: boolean;
+  analytics: boolean;
+  marketing: boolean;
+}
+
+export interface PublicTrackingConfig {
+  gtmContainerId?: string;
+  linkedInInsightTagId?: string;
+  consentPolicy: ConsentPolicy;
+}
+
+export interface AdminTrackingConfig {
+  gtm: { containerId: string };
+  facebook: { pixelId: string; capiToken: string };
+  tiktok: { pixelId: string; eventsApiToken: string };
+  linkedin: { insightTagId: string };
+  consentPolicy: ConsentPolicy;
+}
+
+export interface ConversionEvent {
+  id: number;
+  event_type: string;
+  channel: 'facebook_capi' | 'tiktok_events';
+  payload_json: string;
+  status: 'sent' | 'failed';
+  sent_at: string;
+  booking_id: number | null;
+}
+
 export interface PublicConfig {
   seo: { title?: string; description?: string };
-  tracking: { gtmId?: string; linkedInPartnerId?: string };
+  tracking: PublicTrackingConfig;
   chatbotEnabled: boolean;
   theme: Theme;
 }

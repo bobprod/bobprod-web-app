@@ -45,6 +45,7 @@ db.exec(`
     email TEXT NOT NULL,
     event_type TEXT,
     requested_date TEXT,
+    venue TEXT,
     message TEXT,
     status TEXT NOT NULL DEFAULT 'pending',
     created_at TEXT NOT NULL DEFAULT (datetime('now'))
@@ -107,7 +108,25 @@ db.exec(`
     source TEXT,
     created_at TEXT NOT NULL DEFAULT (datetime('now'))
   );
+
+  CREATE TABLE IF NOT EXISTS conversion_events (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    event_type TEXT NOT NULL,
+    channel TEXT NOT NULL CHECK (channel IN ('facebook_capi', 'tiktok_events')),
+    payload_json TEXT NOT NULL,
+    status TEXT NOT NULL CHECK (status IN ('sent', 'failed')),
+    sent_at TEXT NOT NULL DEFAULT (datetime('now')),
+    booking_id INTEGER REFERENCES bookings (id) ON DELETE SET NULL
+  );
+  CREATE INDEX IF NOT EXISTS idx_conversion_events_booking ON conversion_events (booking_id);
 `);
+
+// Migration: `venue` was added to `bookings` after initial release — backfill it on
+// existing databases that were created before this column existed.
+const bookingColumns = db.prepare('PRAGMA table_info(bookings)').all() as unknown as { name: string }[];
+if (!bookingColumns.some((c) => c.name === 'venue')) {
+  db.exec('ALTER TABLE bookings ADD COLUMN venue TEXT');
+}
 
 // Seed the single admin account from env on first boot.
 function seedAdmin() {
