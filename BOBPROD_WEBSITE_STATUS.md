@@ -1,4 +1,4 @@
-# bobprod — état du projet
+# bobprod web site — status
 
 Document de passation détaillé pour reprendre le développement dans une nouvelle session
 (notamment une session locale qui va traiter de vraies photos/vidéos de l'artiste). Lis ce fichier
