@@ -6,6 +6,7 @@ import { formatEventDate } from '../lib/date';
 import { musicEventJsonLd } from '../lib/seo';
 import { BlockList } from '../components/blocks/BlockList';
 import { usePublicConfig } from '../lib/publicConfig';
+import { eventMessage, whatsappUrl } from '../lib/whatsapp';
 import { useRevealAnimations } from '../lib/useRevealAnimations';
 
 const DEFAULT_DESCRIPTION = 'Upcoming tour dates and show tickets for bobprod — house & techno DJ and producer.';
@@ -63,6 +64,7 @@ export default function Events() {
         )}
         {events?.map((event) => {
           const { day, month } = formatEventDate(event.event_date);
+          const reserveUrl = whatsappUrl(config.whatsappNumber, eventMessage(event));
           return (
             <div
               key={event.id}
@@ -76,20 +78,31 @@ export default function Events() {
                 <p className="truncate text-sm font-semibold text-white">{event.city ?? 'TBA'}</p>
                 <p className="truncate text-xs text-white/60">{event.venue}</p>
               </div>
-              {event.ticket_url ? (
-                <a
-                  href={event.ticket_url}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="flex-none rounded-full bg-linear-to-br from-[var(--accent-red)] to-[var(--accent-gold)] px-4 py-2 text-xs font-semibold text-white"
-                >
-                  Tickets
-                </a>
-              ) : (
-                <span className="flex-none rounded-full border border-white/15 px-4 py-2 text-xs text-white/50">
-                  Soon
-                </span>
-              )}
+              <div className="flex flex-none flex-col items-end gap-2 sm:flex-row sm:items-center">
+                {reserveUrl && (
+                  <a
+                    href={reserveUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="rounded-full bg-linear-to-br from-[var(--accent-red)] to-[var(--accent-gold)] px-4 py-2 text-xs font-semibold text-white"
+                  >
+                    Réserver
+                  </a>
+                )}
+                {event.ticket_url && (
+                  <a
+                    href={event.ticket_url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="rounded-full border border-white/15 px-4 py-2 text-xs font-semibold text-white/80 hover:text-white"
+                  >
+                    Tickets
+                  </a>
+                )}
+                {!reserveUrl && !event.ticket_url && (
+                  <span className="rounded-full border border-white/15 px-4 py-2 text-xs text-white/50">Soon</span>
+                )}
+              </div>
             </div>
           );
         })}

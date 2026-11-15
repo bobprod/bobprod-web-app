@@ -85,6 +85,7 @@ export interface PublicConfig {
   seo: { title?: string; description?: string };
   tracking: PublicTrackingConfig;
   chatbotEnabled: boolean;
+  whatsappNumber?: string;
   theme: Theme;
 }
 

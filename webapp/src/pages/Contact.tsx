@@ -1,10 +1,11 @@
-import { useState, type FormEvent } from 'react';
+import { useRef, useState, type FormEvent } from 'react';
 import { Helmet } from 'react-helmet-async';
 import { api, ApiError } from '../lib/api';
 import { BlockList } from '../components/blocks/BlockList';
 import { BookingCalendar } from '../components/BookingCalendar';
 import { usePublicConfig } from '../lib/publicConfig';
 import { useConsent } from '../lib/consent';
+import { prestationMessage, whatsappUrl } from '../lib/whatsapp';
 
 const EVENT_TYPES = ['Club Night', 'Private Event', 'Festival'];
 const DEFAULT_DESCRIPTION = "Book bobprod for your club night, private event, or festival.";
@@ -25,6 +26,7 @@ export default function Contact() {
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const formRef = useRef<HTMLFormElement>(null);
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -92,7 +94,7 @@ export default function Contact() {
         ))}
       </div>
 
-      <form onSubmit={handleSubmit} className="mt-6 flex flex-col gap-4">
+      <form ref={formRef} onSubmit={handleSubmit} className="mt-6 flex flex-col gap-4">
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
             <label htmlFor="name" className="mb-1 block text-xs text-white/55">
@@ -144,13 +146,31 @@ export default function Contact() {
           />
         </div>
         {error && <p className="text-xs text-red-400">{error}</p>}
-        <button
-          type="submit"
-          disabled={submitting}
-          className="rounded-full bg-linear-to-br from-[var(--accent-red)] to-[var(--accent-gold)] px-6 py-3 text-sm font-semibold text-white hover:brightness-110 disabled:opacity-60"
-        >
-          {submitting ? 'Sending…' : 'Send Request'}
-        </button>
+        <div className="flex flex-col gap-3 sm:flex-row">
+          <button
+            type="submit"
+            disabled={submitting}
+            className="rounded-full bg-linear-to-br from-[var(--accent-red)] to-[var(--accent-gold)] px-6 py-3 text-sm font-semibold text-white hover:brightness-110 disabled:opacity-60"
+          >
+            {submitting ? 'Sending…' : 'Send Request'}
+          </button>
+          {whatsappUrl(config.whatsappNumber, 'x') && (
+            <button
+              type="button"
+              onClick={() => {
+                const venue = (new FormData(formRef.current ?? undefined).get('venue') as string | null) ?? '';
+                const url = whatsappUrl(
+                  config.whatsappNumber,
+                  prestationMessage({ type: eventType, date: selectedDate, venue }),
+                );
+                if (url) window.open(url, '_blank', 'noopener');
+              }}
+              className="rounded-full border border-white/15 px-6 py-3 text-sm font-semibold text-white/80 hover:text-white"
+            >
+              Réserver sur WhatsApp
+            </button>
+          )}
+        </div>
       </form>
     </section>
 
