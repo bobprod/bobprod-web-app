@@ -581,6 +581,7 @@ app.get('/api/public-config', (_req, res) => {
     seo: getSetting('seo', {}),
     tracking: getPublicTrackingConfig(),
     chatbotEnabled: getSetting('chatbotEnabled', false),
+    whatsappNumber: getSetting('whatsappNumber', process.env.PUBLIC_WHATSAPP_NUMBER ?? ''),
     theme: theme.get(),
   });
 });
